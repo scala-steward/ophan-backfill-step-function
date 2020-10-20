@@ -22,6 +22,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.1",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.2.0",
   "com.amazonaws" % "aws-java-sdk-ssm" % "1.11.883",
+  "com.lihaoyi" %% "upickle" % "1.2.2",
   "com.google.cloud" % "google-cloud-bigquery" % "1.122.2",
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.13.3",
   "org.slf4j" % "slf4j-api" % "1.7.30"
