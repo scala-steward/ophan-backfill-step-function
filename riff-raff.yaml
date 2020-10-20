@@ -6,6 +6,7 @@ deployments:
     type: aws-lambda
     parameters:
       bucket: ophan-dist
-      functionNames: [ophan-backfill]
-      fileName: ophan-backfill.jar
-
+      functions:
+        PROD:
+          filename: ophan-backfill.jar
+          name: ophan-backfill-InitJob-PROD

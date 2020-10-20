@@ -58,11 +58,11 @@ Resources:
   InitJobLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub InitJob-${App}-${Stage}
+      FunctionName: !Sub ${App}-InitJob-${Stage}
       Code:
         S3Bucket:
           Ref: DeployBucket
-        S3Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
+        S3Key: !Sub ophan/${Stage}/ophan-backfill/ophan-backfill.jar
       Environment:
         Variables:
           Stage: !Ref Stage
