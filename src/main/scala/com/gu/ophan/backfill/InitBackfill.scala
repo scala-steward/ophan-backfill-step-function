@@ -29,18 +29,20 @@ object InitBackfill {
 
   def parseInput(input: InputStream): JobConfig = upickle.default.read[JobConfig](input)
 
-  def handler(cfgInput: InputStream, context: Context): Unit = {
+  def handler(cfgInput: InputStream, context: Context): String = {
     val env = Env()
-    logger.info(s"Starting $env")
     val cfg = parseInput(cfgInput)
-    logger.info(s"config: $cfg")
+    val res = process(cfg, env)
+    logger.info(res)
+    res
   }
 
   /*
    * I recommend to put your logic outside of the handler
    */
   def process(cfg: JobConfig, env: Env): String = {
-    s"Job for ${cfg.startDateInc} => ${cfg.endDateExc}"
+    val creds = Auth.getCredentials(env)
+    s"Job for ${cfg.startDateInc} => ${cfg.endDateExc} ;; auth: ${creds.toString.take(50)}..."
   }
 }
 
