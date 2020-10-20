@@ -8,11 +8,4 @@ deployments:
       bucket: ophan-dist
       functionNames: [ophan-backfill]
       fileName: ophan-backfill.jar
-    dependencies: [ophan-backfill-cfn]
-  ophan-backfill-cfn:
-    type: cloud-formation
-    app: ophan-backfill
-    parameters:
-      prependStackToCloudFormationStackName: false
-      cloudFormationStackName: ophan-backfill
-      templatePath: cfn.yaml
+
