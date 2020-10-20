@@ -1,0 +1,19 @@
+stacks: [ophan]
+regions: [eu-west-1]
+
+deployments:
+  ophan-backfill:
+    type: aws-lambda
+    parameters:
+      bucket: ophan-dist
+      functionNames: [ophan-backfill-]
+      fileName: ophan-backfill.jar
+      prefixStack: false
+    dependencies: [ophan-backfill-cfn]
+  ophan-backfill-cfn:
+    type: cloud-formation
+    app: ophan-backfill
+    parameters:
+      prependStackToCloudFormationStackName: false
+      cloudFormationStackName: ophan-backfill
+      templatePath: cfn.yaml
