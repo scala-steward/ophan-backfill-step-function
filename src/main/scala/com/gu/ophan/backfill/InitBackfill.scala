@@ -22,9 +22,6 @@ object InitBackfill {
 
   val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-  /*
-   * This is your lambda entry point
-   */
   def handler(cfg: JobConfig, context: Context): Unit = {
     val env = Env()
     logger.info(s"Starting $env")
@@ -35,7 +32,6 @@ object InitBackfill {
    * I recommend to put your logic outside of the handler
    */
   def process(cfg: JobConfig, env: Env): String = {
-    println("creds: " + Auth.getCredentials(env))
     s"Job for ${cfg.startDateInc} => ${cfg.endDateExc}"
   }
 }

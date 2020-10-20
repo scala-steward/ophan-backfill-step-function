@@ -49,10 +49,16 @@ Resources:
               Action:
                 - lambda:InvokeFunction
               Resource: "*"
-  Lambda:
+        - PolicyName: params
+          PolicyDocument:
+            Statement:
+              Effect: Allow
+              Action: ssm:GetParameter
+              Resource: [!Sub 'arn:aws:ssm:eu-west-1:021353022223:parameter/Ophan/backfill/${Stage}/google-creds.json']
+  InitJobLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub ${App}-${Stage}
+      FunctionName: !Sub InitJob-${App}-${Stage}
       Code:
         S3Bucket:
           Ref: DeployBucket
@@ -63,25 +69,25 @@ Resources:
           Stack: !Ref Stack
           App: !Ref App
       Description: ophan backfill
-      Handler: com.gu.ophan.backfill.Lambda::handler
+      Handler: com.gu.ophan.backfill.InitBackfill::handler
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
       Timeout: 60
 
-  DailyEvent:
-    Type: AWS::Events::Rule
-    Properties:
-      Description: Event sent to process the previous day of data
-      ScheduleExpression: cron(14 3 * * ? *)
-      Targets:
-        - Id: Lambda
-          Arn: !GetAtt Lambda.Arn
+  # DailyEvent:
+  #   Type: AWS::Events::Rule
+  #   Properties:
+  #     Description: Event sent to process the previous day of data
+  #     ScheduleExpression: cron(14 3 * * ? *)
+  #     Targets:
+  #       - Id: Lambda
+  #         Arn: !GetAtt Lambda.Arn
 
-  DailyEventLambdaPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt Lambda.Arn
-      Principal: events.amazonaws.com
-      SourceArn: !GetAtt DailyEvent.Arn
+  # DailyEventLambdaPermission:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     Action: lambda:InvokeFunction
+  #     FunctionName: !GetAtt Lambda.Arn
+  #     Principal: events.amazonaws.com
+  #     SourceArn: !GetAtt DailyEvent.Arn

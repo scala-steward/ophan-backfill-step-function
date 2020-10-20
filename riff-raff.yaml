@@ -6,7 +6,7 @@ deployments:
     type: aws-lambda
     parameters:
       bucket: ophan-dist
-      functionNames: [ophan-backfill-]
+      functionNames: [ophan-backfill]
       fileName: ophan-backfill.jar
       prefixStack: false
     dependencies: [ophan-backfill-cfn]
