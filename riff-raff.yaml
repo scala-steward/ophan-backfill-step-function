@@ -8,7 +8,6 @@ deployments:
       bucket: ophan-dist
       functionNames: [ophan-backfill]
       fileName: ophan-backfill.jar
-      prefixStack: false
     dependencies: [ophan-backfill-cfn]
   ophan-backfill-cfn:
     type: cloud-formation
