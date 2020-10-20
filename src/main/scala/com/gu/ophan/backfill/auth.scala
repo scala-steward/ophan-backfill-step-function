@@ -6,6 +6,7 @@ import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
 import com.amazonaws.regions.Regions
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.auth.{ AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider }
 
 /**
  * code to get the authentication credentials for google cloud service
@@ -15,12 +16,15 @@ object Auth {
 
   val region = Regions.EU_WEST_1
   val stage = "CODE"
-  val creds = new ProfileCredentialsProvider("ophan")
+
+  val awsCredentials = new AWSCredentialsProviderChain(
+    new EnvironmentVariableCredentialsProvider,
+    new ProfileCredentialsProvider("ophan"))
 
   val ssm = AWSSimpleSystemsManagementClientBuilder
     .standard()
     .withRegion(region)
-    .withCredentials(creds)
+    .withCredentials(awsCredentials)
     .build()
 
   def getCredentials(env: Env): GoogleCredentials = {
