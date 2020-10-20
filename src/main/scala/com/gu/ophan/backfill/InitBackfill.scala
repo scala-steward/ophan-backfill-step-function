@@ -4,17 +4,9 @@ import com.amazonaws.services.lambda.runtime.Context
 import org.slf4j.{ Logger, LoggerFactory }
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.io.InputStream
+import java.io.{ InputStream, ByteArrayInputStream }
 
 case class JobConfig(startDateInc: Instant, endDateExc: Instant)
-object JobConfig {
-  def fromJson(json: ujson.Value): JobConfig = {
-    val obj = json.obj
-    JobConfig(
-      startDateInc = Instant.parse(obj("startDateInc").str),
-      endDateExc = Instant.parse(obj("endDateInc").str))
-  }
-}
 
 case class Env(app: String, stack: String, stage: String) {
   override def toString: String = s"App: $app, Stack: $stack, Stage: $stage"
@@ -31,12 +23,16 @@ object InitBackfill {
 
   val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-  //  def parseInput(input: Map[String, String]): JobConfig = ???
+  // sometimes you just have to admire scala ... *sometimes* ...
+  implicit val dateReader = upickle.default.reader[String].map(Instant.parse _)
+  implicit val cfgReader = upickle.default.macroR[JobConfig]
+
+  def parseInput(input: InputStream): JobConfig = upickle.default.read[JobConfig](input)
 
   def handler(cfgInput: InputStream, context: Context): Unit = {
     val env = Env()
     logger.info(s"Starting $env")
-    val cfg = JobConfig.fromJson(ujson.read(cfgInput))
+    val cfg = parseInput(cfgInput)
     logger.info(s"config: $cfg")
   }
 
@@ -49,7 +45,15 @@ object InitBackfill {
 }
 
 object TestIt {
+  val example = """
+{
+  "startDateInc": "2020-05-10T00:00:00Z",
+  "endDateExc":   "2020-05-10T00:05:00Z"
+}
+"""
+
   def main(args: Array[String]): Unit = {
-    println(InitBackfill.process(JobConfig(Instant.now().minus(2, ChronoUnit.DAYS), Instant.now().minus(1, ChronoUnit.DAYS)), Env()))
+    val cfg = InitBackfill.parseInput(new ByteArrayInputStream(example.getBytes()))
+    println(InitBackfill.process(cfg, Env()))
   }
 }
