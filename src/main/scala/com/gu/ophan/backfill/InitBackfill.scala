@@ -34,6 +34,6 @@ SELECT count(*) FROM public.pageview
     val src = querySrc(cfg)
     logger.info(s"Sending query: $src")
     val jobId = bq.query(src, dryRun = false)
-    cfg.copy(jobId = Some(jobId))
+    cfg.copy(bqJobId = Some(jobId))
   }
 }

@@ -9,7 +9,7 @@ import org.slf4j.{ Logger, LoggerFactory }
 
 object QueryJobState extends SimpleHandler[JobConfig] {
   def process(cfg: JobConfig)(implicit env: Env): JobConfig = {
-    logger.info(s"checking status of jobid: ${cfg.jobId.get}")
+    logger.info(s"checking status of jobid: ${cfg.bqJobId.get}")
     cfg.copy(complete = false)
   }
 }
