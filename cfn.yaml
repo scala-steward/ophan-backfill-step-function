@@ -111,7 +111,7 @@ Resources:
           Stack: !Ref Stack
           App: !Ref App
       Description: ophan backfill
-      Handler: com.gu.ophan.backfill.QueryJobState::handler
+      Handler: com.gu.ophan.backfill.QueryJobState::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
