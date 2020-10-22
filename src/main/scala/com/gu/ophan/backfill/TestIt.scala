@@ -11,9 +11,9 @@ object TestIt {
 """
 
   def main(args: Array[String]): Unit = {
-    val cfg = InitBackfill.parseInput(new ByteArrayInputStream(example.getBytes()))
+    val cfg = InitBackfill.instance.parseInput(new ByteArrayInputStream(example.getBytes()))
 
     QueryJobState.process(
-      InitBackfill.process(cfg, Env()))
+      InitBackfill.instance.process(cfg, Env()))
   }
 }

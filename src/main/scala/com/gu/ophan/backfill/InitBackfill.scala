@@ -26,7 +26,7 @@ object Env {
     Option(System.getenv("Stage")).getOrElse("DEV"))
 }
 
-object InitBackfill extends RequestStreamHandler {
+class InitBackfill extends RequestStreamHandler {
 
   val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -66,4 +66,8 @@ SELECT count(*) FROM public.pageview
     logger.info(s"Sending query: $src")
     bq.query(src, dryRun = false)
   }
+}
+
+object InitBackfill {
+  lazy val instance = new InitBackfill()
 }
