@@ -15,4 +15,7 @@ deployments:
     type: cloud-formation
     dependencies: [ophan-backfill]
     parameters:
+      cloudFormationStackByTags: false
+      prependStackToCloudFormationStackName: false
+      cloudFormationStackName: ophan-backfill
       templatePath: cfn.yaml
