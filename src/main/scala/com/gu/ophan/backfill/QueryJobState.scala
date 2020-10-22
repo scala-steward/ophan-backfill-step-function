@@ -13,6 +13,11 @@ object QueryJobState extends SimpleHandler[JobConfig] {
     logger.info(s"checking status of jobid: ${cfg.bqJobId.get}")
 
     // pretend it is complete after it runs for 3 minutes
-    cfg.copy(complete = (Duration.between(cfg.jobStartTime, Instant.now()) compareTo Duration.ofMinutes(3)) > 0)
+    val newState =
+      if ((Duration.between(cfg.jobStartTime, Instant.now()) compareTo Duration.ofMinutes(3)) > 0)
+        JobState.COMPLETED
+      else
+        JobState.RUNNING
+    cfg.copy(state = newState)
   }
 }
