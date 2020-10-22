@@ -55,6 +55,28 @@ Resources:
               Effect: Allow
               Action: ssm:GetParameter
               Resource: [!Sub 'arn:aws:ssm:eu-west-1:021353022223:parameter/Ophan/backfill/${Stage}/google-creds.json']
+
+  StatesExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: !Sub states.${AWS::Region}.amazonaws.com
+          Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: StatesExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                - lambda:InvokeFunction
+                Resource: "*"
+
   InitJobLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -95,6 +117,41 @@ Resources:
       Runtime: java8
       Timeout: 60
 
+  OphanBackfillStepFunction:
+    Type: "AWS::StepFunctions::StateMachine"
+    DependsOn:
+    - InitJobLambda
+    - QueryJobStateLambda
+    Properties:
+      StateMachineName: Ophan-Backfill-Extractor
+      DefinitionString:
+        !Sub
+          - |
+           {
+             "Comment": "Ophan backfill: data extractor (extracts data from the data lake)",
+             "StartAt": "InitJob",
+             "States": {
+               "InitJob": {
+                 "Type": "Task",
+                 "Resource": "${InitJobArn}",
+                 "Next": "PauseForJobToRun"
+                },
+               "PauseForJobToRun": {
+                 "Type": "Wait",
+                 "Seconds": 60,
+                 "Next": "CheckQueryJobStatus"
+               },
+               "CheckQueryJobStatus": {
+                 "Type": "Task",
+                 "Resource": "${QueryJobStateArn}",
+                 "End": true
+               }
+             }
+           }
+          -
+            InitJobArn: !GetAtt InitJobLambda.Arn
+            QueryJobStateArn: !GetAtt QueryJobStateLambda.Arn
+      RoleArn: !GetAtt StatesExecutionRole.Arn
 
   # DailyEvent:
   #   Type: AWS::Events::Rule

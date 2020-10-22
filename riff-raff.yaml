@@ -11,3 +11,8 @@ deployments:
       functionNames:
         - ophan-backfill-InitJob-
         - ophan-backfill-QueryJobState-
+  cloudformation:
+    type: cloud-formation
+    dependencies: [ophan-backfill]
+    parameters:
+      templatePath: cfn.yaml
