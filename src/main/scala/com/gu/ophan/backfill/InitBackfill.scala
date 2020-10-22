@@ -2,9 +2,11 @@ package com.gu.ophan.backfill
 
 import com.amazonaws.services.lambda.runtime.Context
 import org.slf4j.{ Logger, LoggerFactory }
-import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.io.{ InputStream, ByteArrayInputStream }
+import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.ZoneId
 
 case class JobConfig(startDateInc: Instant, endDateExc: Instant)
 
@@ -33,8 +35,17 @@ object InitBackfill {
     val env = Env()
     val cfg = parseInput(cfgInput)
     val res = process(cfg, env)
-    logger.info(res)
+    logger.info(s"jobid: ${res}")
     res
+  }
+
+  def formatDate(dt: Instant) = DateTimeFormatter.ofPattern("y-m-d").format(dt.atZone(ZoneId.of("Europe/London")))
+
+  def querySrc(cfg: JobConfig) = {
+    // this is just an example for testing, it doesn't belong here!
+    s"""
+SELECT count(*) FROM public.pageview WHERE received_date >= date"${formatDate(cfg.startDateInc)}" AND received_date < date"${formatDate(cfg.endDateExc)}";
+"""
   }
 
   /*
@@ -42,7 +53,8 @@ object InitBackfill {
    */
   def process(cfg: JobConfig, env: Env): String = {
     val creds = Auth.getCredentials(env)
-    s"Job for ${cfg.startDateInc} => ${cfg.endDateExc} ;; auth: ${creds.toString.take(50)}..."
+    val bq = new BigQuery(env)
+    bq.query(querySrc(cfg), dryRun = false)
   }
 }
 
