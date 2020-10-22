@@ -5,7 +5,7 @@ import java.time.Instant
 case class JobConfig(
   startDateInc: Instant,
   endDateExc: Instant,
-  jobStarted: Instant = Instant.now(),
+  jobStartTime: Instant = Instant.now(),
   bqJobId: Option[String] = None,
   complete: Boolean = false)
 
