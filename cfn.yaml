@@ -91,7 +91,7 @@ Resources:
           Stack: !Ref Stack
           App: !Ref App
       Description: ophan backfill
-      Handler: com.gu.ophan.backfill.InitBackfill
+      Handler: com.gu.ophan.backfill.InitBackfill::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
