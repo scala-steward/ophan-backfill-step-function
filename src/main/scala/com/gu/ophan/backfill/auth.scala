@@ -28,10 +28,11 @@ object Auth {
     .build()
 
   def getCredentials(env: Env): GoogleCredentials = {
+    val parameterName = s"/Ophan/backfill/${env.stage}/google-creds.json"
     val credsString = ssm.getParameter(
       new GetParameterRequest()
         .withWithDecryption(true)
-        .withName(s"/Ophan/backfill/${env.stage}/google-creds.json"))
+        .withName(parameterName))
       .getParameter
       .getValue
     GoogleCredentials.fromStream(new ByteArrayInputStream(credsString.getBytes()))
