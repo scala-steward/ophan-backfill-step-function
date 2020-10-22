@@ -40,7 +40,7 @@ object InitBackfill {
     val cfg = parseInput(cfgInput)
     val res = process(cfg, env)
     logger.info(s"jobid: ${res}")
-    res
+    upickle.default.write(res)
   }
 
   def formatDate(dt: Instant) = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(dt.atZone(ZoneId.of("Europe/London")))
