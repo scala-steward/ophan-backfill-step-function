@@ -11,9 +11,9 @@ object TestIt {
 """
 
   def main(args: Array[String]): Unit = {
-    val cfg = InitBackfill.parseInput(new ByteArrayInputStream(example.getBytes()))
-
+    val cfg = upickle.default.read[JobConfig](example)
+    implicit val env = Env()
     QueryJobState.process(
-      InitBackfill.process(cfg, Env()))
+      InitBackfill.process(cfg))
   }
 }
