@@ -152,7 +152,7 @@ Resources:
                    {
                      "Variable": "$.state",
                      "StringEquals": "RUNNING",
-                     "Next": "CheckQueryJobStatus"
+                     "Next": "PauseForJobToRun"
                    },
                    {
                      "Variable": "$.state",
