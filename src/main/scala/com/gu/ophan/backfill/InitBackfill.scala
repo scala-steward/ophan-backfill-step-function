@@ -4,13 +4,14 @@ package com.gu.ophan.backfill
  * Step 1: Initiate the data extraction job
  */
 
-import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.lambda.runtime.{ Context, RequestStreamHandler }
 import org.slf4j.{ Logger, LoggerFactory }
 import java.time.temporal.ChronoUnit
 import java.io.InputStream
 import java.time.format.DateTimeFormatter
 import java.time.Instant
 import java.time.ZoneId
+import java.io.OutputStream
 
 case class JobConfig(startDateInc: Instant, endDateExc: Instant)
 
@@ -25,7 +26,7 @@ object Env {
     Option(System.getenv("Stage")).getOrElse("DEV"))
 }
 
-object InitBackfill {
+object InitBackfill extends RequestStreamHandler {
 
   val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -35,12 +36,12 @@ object InitBackfill {
 
   def parseInput(input: InputStream): JobConfig = upickle.default.read[JobConfig](input)
 
-  def handler(cfgInput: InputStream, context: Context): String = {
+  def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
     val env = Env()
-    val cfg = parseInput(cfgInput)
+    val cfg = parseInput(input)
     val res = process(cfg, env)
     logger.info(s"jobid: ${res}")
-    upickle.default.write(res)
+    output.write(upickle.default.write(res).getBytes)
   }
 
   def formatDate(dt: Instant) = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(dt.atZone(ZoneId.of("Europe/London")))
