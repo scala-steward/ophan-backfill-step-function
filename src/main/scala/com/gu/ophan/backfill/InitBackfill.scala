@@ -1,9 +1,13 @@
 package com.gu.ophan.backfill
 
+/**
+ * Step 1: Initiate the data extraction job
+ */
+
 import com.amazonaws.services.lambda.runtime.Context
 import org.slf4j.{ Logger, LoggerFactory }
 import java.time.temporal.ChronoUnit
-import java.io.{ InputStream, ByteArrayInputStream }
+import java.io.InputStream
 import java.time.format.DateTimeFormatter
 import java.time.Instant
 import java.time.ZoneId
@@ -39,12 +43,15 @@ object InitBackfill {
     res
   }
 
-  def formatDate(dt: Instant) = DateTimeFormatter.ofPattern("y-m-d").format(dt.atZone(ZoneId.of("Europe/London")))
+  def formatDate(dt: Instant) = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(dt.atZone(ZoneId.of("Europe/London")))
 
   def querySrc(cfg: JobConfig) = {
     // this is just an example for testing, it doesn't belong here!
     s"""
-SELECT count(*) FROM public.pageview WHERE received_date >= date"${formatDate(cfg.startDateInc)}" AND received_date < date"${formatDate(cfg.endDateExc)}";
+SELECT count(*) FROM public.pageview
+  WHERE received_date >= date"${formatDate(cfg.startDateInc)}" AND
+        received_date < date"${formatDate(cfg.endDateExc.plus(7, ChronoUnit.DAYS))}" AND
+        event_timestamp >= timestamp"${cfg.startDateInc}" AND event_timestamp < timestamp"${cfg.endDateExc}";
 """
   }
 
@@ -54,20 +61,8 @@ SELECT count(*) FROM public.pageview WHERE received_date >= date"${formatDate(cf
   def process(cfg: JobConfig, env: Env): String = {
     val creds = Auth.getCredentials(env)
     val bq = new BigQuery(env)
-    bq.query(querySrc(cfg), dryRun = false)
-  }
-}
-
-object TestIt {
-  val example = """
-{
-  "startDateInc": "2020-05-10T00:00:00Z",
-  "endDateExc":   "2020-05-10T00:05:00Z"
-}
-"""
-
-  def main(args: Array[String]): Unit = {
-    val cfg = InitBackfill.parseInput(new ByteArrayInputStream(example.getBytes()))
-    println(InitBackfill.process(cfg, Env()))
+    val src = querySrc(cfg)
+    logger.info(s"Sending query: $src")
+    bq.query(src, dryRun = false)
   }
 }
