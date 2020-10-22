@@ -144,7 +144,30 @@ Resources:
                "CheckQueryJobStatus": {
                  "Type": "Task",
                  "Resource": "${QueryJobStateArn}",
-                 "End": true
+                 "Next": "IsJobComplete"
+               },
+               "IsJobComplete": {
+                 "Type": "Choice",
+                 "Choices": [
+                   {
+                     "Variable": "$.state",
+                     "StringEquals": "RUNNING",
+                     "Next": "CheckQueryJobStatus"
+                   },
+                   {
+                     "Variable": "$.state",
+                     "StringEquals": "COMPLETED",
+                     "Next": "CollectJobData"
+                   }
+                 ],
+                 "Default": "UnknownJobState"
+               },
+               "CollectJobData": {
+                 "Type": "Succeed"
+               },
+               "UnknownJobState": {
+                 "Type": "Fail",
+                 "Cause": "Unrecognised job stats"
                }
              }
            }
