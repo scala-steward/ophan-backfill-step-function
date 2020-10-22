@@ -75,6 +75,27 @@ Resources:
       Runtime: java8
       Timeout: 60
 
+  QueryJobStateLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${App}-QueryJobState-${Stage}
+      Code:
+        S3Bucket:
+          Ref: DeployBucket
+        S3Key: !Sub ophan/${Stage}/ophan-backfill/ophan-backfill.jar
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          Stack: !Ref Stack
+          App: !Ref App
+      Description: ophan backfill
+      Handler: com.gu.ophan.backfill.QueryJobState::handler
+      MemorySize: 1024
+      Role: !GetAtt ExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+
+
   # DailyEvent:
   #   Type: AWS::Events::Rule
   #   Properties:
