@@ -91,7 +91,7 @@ Resources:
           Stack: !Ref Stack
           App: !Ref App
       Description: ophan backfill
-      Handler: com.gu.ophan.backfill.InitBackfill::handleRequest
+      Handler: com.gu.ophan.backfill.InitBackfillStep::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
@@ -111,7 +111,27 @@ Resources:
           Stack: !Ref Stack
           App: !Ref App
       Description: ophan backfill
-      Handler: com.gu.ophan.backfill.QueryJobState::handleRequest
+      Handler: com.gu.ophan.backfill.QueryJobStateStep::handleRequest
+      MemorySize: 1024
+      Role: !GetAtt ExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+
+  ExtractDataLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${App}-ExtractData-${Stage}
+      Code:
+        S3Bucket:
+          Ref: DeployBucket
+        S3Key: !Sub ophan/${Stage}/ophan-backfill/ophan-backfill.jar
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          Stack: !Ref Stack
+          App: !Ref App
+      Description: ophan backfill
+      Handler: com.gu.ophan.backfill.ExtractDataStep::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
@@ -163,7 +183,9 @@ Resources:
                  "Default": "UnknownJobState"
                },
                "CollectJobData": {
-                 "Type": "Succeed"
+                 "Type": "Task",
+                 "Resource": "${ExtractDataArn}",
+                 "End": true
                },
                "UnknownJobState": {
                  "Type": "Fail",
@@ -174,21 +196,5 @@ Resources:
           -
             InitJobArn: !GetAtt InitJobLambda.Arn
             QueryJobStateArn: !GetAtt QueryJobStateLambda.Arn
+            ExtractDataArn: !GetAtt ExtractDataLambda.Arn
       RoleArn: !GetAtt StatesExecutionRole.Arn
-
-  # DailyEvent:
-  #   Type: AWS::Events::Rule
-  #   Properties:
-  #     Description: Event sent to process the previous day of data
-  #     ScheduleExpression: cron(14 3 * * ? *)
-  #     Targets:
-  #       - Id: Lambda
-  #         Arn: !GetAtt Lambda.Arn
-
-  # DailyEventLambdaPermission:
-  #   Type: AWS::Lambda::Permission
-  #   Properties:
-  #     Action: lambda:InvokeFunction
-  #     FunctionName: !GetAtt Lambda.Arn
-  #     Principal: events.amazonaws.com
-  #     SourceArn: !GetAtt DailyEvent.Arn

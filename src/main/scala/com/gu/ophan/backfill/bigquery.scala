@@ -33,4 +33,6 @@ class BigQuery(implicit env: Env) {
 
   def getJob(jobId: String): Job = client.getJob(jobId)
 
+  def getTable(datasetId: String, tableId: String): Table = client.getTable(datasetId, tableId)
+
 }

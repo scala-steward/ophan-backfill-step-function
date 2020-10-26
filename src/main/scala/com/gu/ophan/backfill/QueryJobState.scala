@@ -10,7 +10,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration
  * Step 2: Check if the data extraction job has completed (this check should be repeated periodically until it has completed)
  */
 
-object QueryJobState extends SimpleHandler[JobConfig] {
+object QueryJobStateStep extends SimpleHandler[JobConfig] {
   def process(cfg: JobConfig)(implicit env: Env): JobConfig = {
     logger.info(s"checking status of jobid: ${cfg.bqJobId.get}")
     val bq = new BigQuery
@@ -24,6 +24,8 @@ object QueryJobState extends SimpleHandler[JobConfig] {
 
     val destTable = job.getConfiguration[QueryJobConfiguration]().getDestinationTable()
 
-    cfg.copy(state = newState, dataTable = Some(destTable.getTable()))
+    logger.info(s"Destination table: ${destTable}")
+
+    cfg.copy(state = newState, dataTable = Some((destTable.getDataset(), destTable.getTable())))
   }
 }

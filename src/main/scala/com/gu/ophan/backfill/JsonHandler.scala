@@ -43,7 +43,6 @@ abstract class JsonHandler[Input: Reader, Output: Writer] extends RequestStreamH
     val res = process(input)
     outputStream.write(upickle.default.write(res).getBytes)
   }
-
 }
 
 // same input and output type

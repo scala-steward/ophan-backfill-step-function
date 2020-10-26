@@ -12,7 +12,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.io.OutputStream
 
-object InitBackfill extends SimpleHandler[JobConfig] {
+object InitBackfillStep extends SimpleHandler[JobConfig] {
 
   def formatDate(dt: Instant) =
     DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -21,7 +21,7 @@ object InitBackfill extends SimpleHandler[JobConfig] {
   def querySrc(cfg: JobConfig) = {
     // this is just an example for testing, it doesn't belong here!
     s"""
-SELECT count(*) FROM datalake.pageview
+SELECT * FROM datalake.pageview
   WHERE received_date >= date"${formatDate(cfg.startDateInc)}" AND
         received_date < date"${formatDate(cfg.endDateExc.plus(7, ChronoUnit.DAYS))}" AND
         event_timestamp >= timestamp"${cfg.startDateInc}" AND event_timestamp < timestamp"${cfg.endDateExc}";
