@@ -174,7 +174,7 @@ Resources:
                "InitJob": {
                  "Type": "Task",
                  "Resource": "${InitJobArn}",
-                 "Next": "PauseForJobToRun"
+                 "Next": "PauseForQueryJobToRun"
                 },
                "PauseForQueryJobToRun": {
                  "Type": "Wait",
@@ -192,11 +192,11 @@ Resources:
                    {
                      "Variable": "$.state",
                      "StringEquals": "RUNNING",
-                     "Next": "PauseForJobToRun"
+                     "Next": "PauseForQueryJobToRun"
                    },
                    {
                      "Variable": "$.state",
-                     "StringEquals": "WAITING,
+                     "StringEquals": "WAITING",
                      "Next": "CollectJobData"
                    }
                  ],
@@ -227,7 +227,7 @@ Resources:
                    },
                    {
                      "Variable": "$.state",
-                     "StringEquals": "WAITING,
+                     "StringEquals": "WAITING",
                      "Next": "JobComplete"
                    }
                  ],
@@ -238,7 +238,7 @@ Resources:
                  "Cause": "Unrecognised job stats"
                },
                "JobComplete": {
-                 "Type": "Success"
+                 "Type": "Succeed"
                }
              }
            }
