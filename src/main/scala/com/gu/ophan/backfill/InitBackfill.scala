@@ -29,11 +29,10 @@ SELECT count(*) FROM datalake.pageview
   }
 
   def process(cfg: JobConfig)(implicit env: Env): JobConfig = {
-    val creds = Auth.getCredentials(env)
-    val bq = new BigQuery(env)
+    val bq = new BigQuery
     val src = querySrc(cfg)
     logger.info(s"Sending query: $src")
-    val jobId = bq.query(src, dryRun = false)
+    val jobId = bq.query(src, dryRun = false).getJobId().getJob()
     cfg.copy(bqJobId = Some(jobId))
   }
 }

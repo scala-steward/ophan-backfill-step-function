@@ -8,7 +8,13 @@ import java.io.OutputStream
 import upickle.default.{ Reader, Writer, ReadWriter }
 
 /**
- * A trait that handles some of the housekeeping of deserialising scala case classes in and out
+ * A trait that handles some of the housekeeping of deserialising
+ * scala case classes in and out, in particular: it is configured to
+ * use the lambda handler which doesn't do any automatic
+ * (de)serialisation, instead it just provides us with an InputStream
+ * and an OutputStream, and we do the serialisation ourselves. The
+ * result is that we can use Scala-based automatic case class
+ * serialisation.
  */
 
 case class Env(app: String, stack: String, stage: String) {

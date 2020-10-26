@@ -11,7 +11,9 @@ case class JobConfig(
   endDateExc: Instant,
   jobStartTime: Instant = Instant.now(),
   bqJobId: Option[String] = None,
-  state: JobState.Value = JobState.INIT)
+  state: JobState.Value = JobState.INIT,
+  dataTable: Option[String] = None
+)
 
 object JobConfig {
   // sometimes you just have to admire scala ... *sometimes* ...

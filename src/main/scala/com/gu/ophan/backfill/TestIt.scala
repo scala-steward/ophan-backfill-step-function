@@ -16,12 +16,13 @@ object TestIt {
     val cfg = upickle.default.read[JobConfig](example)
     implicit val env = Env()
 
-    val step1 = InitBackfill.process(cfg)
+    lazy val step1 = InitBackfill.process(cfg)
       .copy(jobStartTime = Instant.now().minus(10, ChronoUnit.MINUTES)) // pretend its been running for 10 minutes
 
-    val step2 = QueryJobState.process(step1)
+    lazy val step2 = QueryJobState.process(step1)
 
-    println(step1)
-    println(step2)
+    println(s"Step 1: ${step1}")
+    Thread.sleep(5000) // simulate delay to give job a bit of time to complete
+    println(s"Step 2: ${step2}")
   }
 }
