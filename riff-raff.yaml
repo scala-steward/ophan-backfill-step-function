@@ -11,6 +11,8 @@ deployments:
       functionNames:
         - ophan-backfill-InitJob-
         - ophan-backfill-QueryJobState-
+        - ophan-backfill-ExtractData-
+        - ophan-backfill-AwaitExtractJobLambda-
   cloudformation:
     type: cloud-formation
     dependencies: [ophan-backfill]
