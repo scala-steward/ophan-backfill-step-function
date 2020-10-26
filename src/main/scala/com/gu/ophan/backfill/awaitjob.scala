@@ -16,9 +16,13 @@ trait AwaitJob extends SimpleHandler[JobConfig] {
       if (cfg.async) baseJob else baseJob.waitFor().reload()
     }
 
+    val jobStatus = job.getStatus()
     val newState =
-      job.getStatus().getState() match {
-        case State.DONE => JobState.WAITING
+      jobStatus.getState() match {
+        case State.DONE =>
+          val err = jobStatus.getError()
+          assert(err == null, s"Job failed: $err")
+          JobState.WAITING
         case State.PENDING | State.RUNNING => JobState.RUNNING
       }
 
