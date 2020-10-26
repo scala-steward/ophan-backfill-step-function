@@ -7,4 +7,4 @@ import com.google.cloud.bigquery.Job
  * should be repeated periodically until it has completed)
  */
 
-object AwaitQueryJobStep extends SimpleHandler[JobConfig] with AwaitJob
+object AwaitExtractJobStep extends SimpleHandler[JobConfig] with AwaitJob

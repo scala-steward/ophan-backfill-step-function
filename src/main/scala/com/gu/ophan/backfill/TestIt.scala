@@ -18,7 +18,8 @@ object TestIt {
     implicit val env = Env()
 
     val steps: Seq[SimpleHandler[JobConfig]] =
-      InitBackfillStep :: QueryJobStateStep :: ExtractDataStep :: Nil
+      InitBackfillStep :: AwaitQueryJobStep :: ExtractDataStep ::
+        AwaitExtractJobStep :: Nil
 
     steps.foldLeft(cfg) { (cfg, step) =>
       val res = step.process(cfg)
