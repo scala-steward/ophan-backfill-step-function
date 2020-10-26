@@ -21,9 +21,9 @@ object InitBackfillStep extends SimpleHandler[JobConfig] {
   def querySrc(cfg: JobConfig) = {
     // this is just an example for testing, it doesn't belong here!
     s"""
-SELECT * FROM datalake.pageview
+SELECT id,browser_id,event_timestamp,platform,url FROM datalake.pageview
   WHERE received_date >= date"${formatDate(cfg.startDateInc)}" AND
-        received_date < date"${formatDate(cfg.endDateExc.plus(7, ChronoUnit.DAYS))}" AND
+        received_date < date"${formatDate(cfg.endDateExc.plus(1, ChronoUnit.DAYS))}" AND
         event_timestamp >= timestamp"${cfg.startDateInc}" AND event_timestamp < timestamp"${cfg.endDateExc}";
 """
   }

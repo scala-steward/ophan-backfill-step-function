@@ -111,7 +111,7 @@ Resources:
           Stack: !Ref Stack
           App: !Ref App
       Description: ophan backfill
-      Handler: com.gu.ophan.backfill.QueryJobStateStep::handleRequest
+      Handler: com.gu.ophan.backfill.AwaitQueryJobStep::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
@@ -137,6 +137,26 @@ Resources:
       Runtime: java8
       Timeout: 60
 
+  AwaitExtractJobLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${App}-AwaitExtractJobLambda-${Stage}
+      Code:
+        S3Bucket:
+          Ref: DeployBucket
+        S3Key: !Sub ophan/${Stage}/ophan-backfill/ophan-backfill.jar
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          Stack: !Ref Stack
+          App: !Ref App
+      Description: ophan backfill
+      Handler: com.gu.ophan.backfill.AwaitExtractJobStep::handleRequest
+      MemorySize: 1024
+      Role: !GetAtt ExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+
   OphanBackfillStepFunction:
     Type: "AWS::StepFunctions::StateMachine"
     DependsOn:
@@ -156,7 +176,7 @@ Resources:
                  "Resource": "${InitJobArn}",
                  "Next": "PauseForJobToRun"
                 },
-               "PauseForJobToRun": {
+               "PauseForQueryJobToRun": {
                  "Type": "Wait",
                  "Seconds": 60,
                  "Next": "CheckQueryJobStatus"
@@ -164,9 +184,9 @@ Resources:
                "CheckQueryJobStatus": {
                  "Type": "Task",
                  "Resource": "${QueryJobStateArn}",
-                 "Next": "IsJobComplete"
+                 "Next": "IsQueryJobComplete"
                },
-               "IsJobComplete": {
+               "IsQueryJobComplete": {
                  "Type": "Choice",
                  "Choices": [
                    {
@@ -176,7 +196,7 @@ Resources:
                    },
                    {
                      "Variable": "$.state",
-                     "StringEquals": "COMPLETED",
+                     "StringEquals": "WAITING,
                      "Next": "CollectJobData"
                    }
                  ],
@@ -185,11 +205,40 @@ Resources:
                "CollectJobData": {
                  "Type": "Task",
                  "Resource": "${ExtractDataArn}",
-                 "End": true
+                 "Next": "PauseForExtractJobToRun"
+               },
+               "PauseForExtractJobToRun": {
+                 "Type": "Wait",
+                 "Seconds": 60,
+                 "Next": "CheckExtractJobStatus"
+               },
+               "CheckExtractJobStatus": {
+                 "Type": "Task",
+                 "Resource": "${AwaitExtractJobArn}",
+                 "Next": "IsExtractJobComplete"
+               },
+               "IsExtractJobComplete": {
+                 "Type": "Choice",
+                 "Choices": [
+                   {
+                     "Variable": "$.state",
+                     "StringEquals": "RUNNING",
+                     "Next": "PauseForExtractJobToRun"
+                   },
+                   {
+                     "Variable": "$.state",
+                     "StringEquals": "WAITING,
+                     "Next": "JobComplete"
+                   }
+                 ],
+                 "Default": "UnknownJobState"
                },
                "UnknownJobState": {
                  "Type": "Fail",
                  "Cause": "Unrecognised job stats"
+               },
+               "JobComplete": {
+                 "Type": "Success"
                }
              }
            }
@@ -197,4 +246,5 @@ Resources:
             InitJobArn: !GetAtt InitJobLambda.Arn
             QueryJobStateArn: !GetAtt QueryJobStateLambda.Arn
             ExtractDataArn: !GetAtt ExtractDataLambda.Arn
+            AwaitExtractJobArn: !GetAtt AwaitExtractJobLambda.Arn
       RoleArn: !GetAtt StatesExecutionRole.Arn

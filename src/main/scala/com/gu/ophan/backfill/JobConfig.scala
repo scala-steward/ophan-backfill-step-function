@@ -3,7 +3,7 @@ package com.gu.ophan.backfill
 import java.time.Instant
 
 object JobState extends Enumeration {
-  val INIT, RUNNING, COMPLETED = Value
+  val INIT, RUNNING, WAITING, COMPLETED = Value
 }
 
 case class JobConfig(
@@ -12,7 +12,9 @@ case class JobConfig(
   jobStartTime: Instant = Instant.now(),
   bqJobId: Option[String] = None,
   state: JobState.Value = JobState.INIT,
-  dataTable: Option[(String, String)] = None)
+  dataTable: Option[(String, String)] = None,
+  destinationUri: Option[String] = None,
+  async: Boolean = true)
 
 object JobConfig {
   // sometimes you just have to admire scala ... *sometimes* ...
