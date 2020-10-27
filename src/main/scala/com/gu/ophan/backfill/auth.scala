@@ -15,7 +15,6 @@ import com.amazonaws.auth.{ AWSCredentialsProviderChain, EnvironmentVariableCred
 object Auth {
 
   val region = Regions.EU_WEST_1
-  val stage = "CODE"
 
   val awsCredentials = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider,

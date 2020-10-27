@@ -15,7 +15,13 @@ case class JobConfig(
   dataTable: Option[(String, String)] = None,
   destinationUri: Option[String] = None,
   async: Boolean = true,
-  errorMsg: Option[String] = None)
+  errorMsg: Option[String] = None) {
+
+  val queryTimeDeclarations: String = s"""
+    |DECLARE startTimeInclusive TIMESTAMP DEFAULT TIMESTAMP("$startDateInc");
+    |DECLARE endTimeExclusive TIMESTAMP DEFAULT TIMESTAMP("$endDateExc");
+  """.stripMargin
+}
 
 object JobConfig {
   // sometimes you just have to admire scala ... *sometimes* ...
