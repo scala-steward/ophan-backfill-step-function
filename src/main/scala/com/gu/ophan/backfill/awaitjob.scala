@@ -17,16 +17,18 @@ trait AwaitJob extends SimpleHandler[JobConfig] {
     }
 
     val jobStatus = job.getStatus()
-    val newState =
+    val nextCfg =
       jobStatus.getState() match {
+        case State.DONE if jobStatus.getError() != null =>
+          logger.error(s"Job completed with error ${jobStatus.getError()}")
+          cfg.copy(state = JobState.ERROR, errorMsg = Some(jobStatus.getError().toString()))
         case State.DONE =>
-          val err = jobStatus.getError()
-          assert(err == null, s"Job failed: $err")
-          JobState.WAITING
-        case State.PENDING | State.RUNNING => JobState.RUNNING
+          cfg.copy(state = JobState.WAITING)
+        case State.PENDING | State.RUNNING =>
+          cfg.copy(state = JobState.RUNNING)
       }
 
-    onComplete(cfg.copy(state = newState), job)
+    onComplete(nextCfg, job)
   }
 
   def process(cfg: JobConfig)(implicit env: Env): JobConfig = awaitBigQueryJob(cfg)

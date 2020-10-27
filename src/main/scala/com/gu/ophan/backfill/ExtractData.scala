@@ -31,6 +31,9 @@ object ExtractDataStep extends SimpleHandler[JobConfig] {
 
     val job = table.extract("CSV", destUri)
 
-    cfg.copy(destinationUri = Some(destUri), state = JobState.RUNNING)
+    cfg.copy(
+      destinationUri = Some(destUri),
+      state = JobState.RUNNING,
+      bqJobId = Some(job.getJobId().getJob()))
   }
 }
