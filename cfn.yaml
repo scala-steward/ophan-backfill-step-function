@@ -157,6 +157,28 @@ Resources:
       Runtime: java8
       Timeout: 60
 
+
+
+  PartitionStepLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${App}-PartitionStepLambda-${Stage}
+      Code:
+        S3Bucket:
+          Ref: DeployBucket
+        S3Key: !Sub ophan/${Stage}/ophan-backfill/ophan-backfill.jar
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          Stack: !Ref Stack
+          App: !Ref App
+      Description: ophan backfill
+      Handler: com.gu.ophan.backfill.PartitionStep::handleRequest
+      MemorySize: 1024
+      Role: !GetAtt ExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+
   OphanBackfillStepFunction:
     Type: "AWS::StepFunctions::StateMachine"
     DependsOn:
@@ -167,97 +189,116 @@ Resources:
       DefinitionString:
         !Sub
           - |
-           {
-             "Comment": "Ophan backfill: data extractor (extracts data from the data lake)",
-             "StartAt": "InitJob",
-             "States": {
-               "InitJob": {
-                 "Type": "Task",
-                 "Resource": "${InitJobArn}",
-                 "Next": "PauseForQueryJobToRun"
+            {
+              "Comment": "Ophan backfill: data extractor (extracts data from the data lake)",
+              "StartAt": "Partition",
+              "States": {
+                "Partition": {
+                  "Type": "Task",
+                  "Resource": "${PartitionArn}",
+                  "Next": "MapOverPartition"
                 },
-               "PauseForQueryJobToRun": {
-                 "Type": "Wait",
-                 "Seconds": 60,
-                 "Next": "CheckQueryJobStatus"
-               },
-               "CheckQueryJobStatus": {
-                 "Type": "Task",
-                 "Resource": "${QueryJobStateArn}",
-                 "Next": "IsQueryJobComplete"
-               },
-               "IsQueryJobComplete": {
-                 "Type": "Choice",
-                 "Choices": [
-                   {
-                     "Variable": "$.state",
-                     "StringEquals": "RUNNING",
-                     "Next": "PauseForQueryJobToRun"
-                   },
-                   {
-                     "Variable": "$.state",
-                     "StringEquals": "WAITING",
-                     "Next": "ExtractDataStartJob"
-                   },
-                   {
-                     "Variable": "$.state",
-                     "StringEquals": "ERROR",
-                     "Next": "ErrorInJob"
-                   }
-                 ],
-                 "Default": "UnknownJobState"
-               },
-               "ExtractDataStartJob": {
-                 "Type": "Task",
-                 "Resource": "${ExtractDataArn}",
-                 "Next": "PauseForExtractJobToRun"
-               },
-               "PauseForExtractJobToRun": {
-                 "Type": "Wait",
-                 "Seconds": 60,
-                 "Next": "CheckExtractJobStatus"
-               },
-               "CheckExtractJobStatus": {
-                 "Type": "Task",
-                 "Resource": "${AwaitExtractJobArn}",
-                 "Next": "IsExtractJobComplete"
-               },
-               "IsExtractJobComplete": {
-                 "Type": "Choice",
-                 "Choices": [
-                   {
-                     "Variable": "$.state",
-                     "StringEquals": "RUNNING",
-                     "Next": "PauseForExtractJobToRun"
-                   },
-                   {
-                     "Variable": "$.state",
-                     "StringEquals": "WAITING",
-                     "Next": "JobComplete"
-                   },
-                   {
-                     "Variable": "$.state",
-                     "StringEquals": "ERROR",
-                     "Next": "ErrorInJob"
-                   }
-                 ],
-                 "Default": "UnknownJobState"
-               },
-               "UnknownJobState": {
-                 "Type": "Fail",
-                 "Cause": "Unrecognised job stats"
-               },
-               "ErrorInJob": {
-                 "Type": "Fail",
-                 "Cause": "$.error"
-               },
-               "JobComplete": {
-                 "Type": "Succeed"
-               }
-             }
-           }
+                "MapOverPartition": {
+                  "Type": "Map",
+                  "InputPath": "$",
+                  "ItemsPath": "$",
+                  "MaxConcurrency": 2,
+                  "ResultPath": "$",
+                  "Iterator": {
+                    "StartAt": "InitJob",
+                    "States": {
+                      "InitJob": {
+                        "Type": "Task",
+                        "Resource": "${InitJobArn}",
+                        "Next": "PauseForQueryJobToRun"
+                      },
+                      "PauseForQueryJobToRun": {
+                        "Type": "Wait",
+                        "Seconds": 60,
+                        "Next": "CheckQueryJobStatus"
+                      },
+                      "CheckQueryJobStatus": {
+                        "Type": "Task",
+                        "Resource": "${QueryJobStateArn}",
+                        "Next": "IsQueryJobComplete"
+                      },
+                      "IsQueryJobComplete": {
+                        "Type": "Choice",
+                        "Choices": [
+                          {
+                            "Variable": "$.state",
+                            "StringEquals": "RUNNING",
+                            "Next": "PauseForQueryJobToRun"
+                          },
+                          {
+                            "Variable": "$.state",
+                            "StringEquals": "WAITING",
+                            "Next": "ExtractDataStartJob"
+                          },
+                          {
+                            "Variable": "$.state",
+                            "StringEquals": "ERROR",
+                            "Next": "ErrorInJob"
+                          }
+                        ],
+                        "Default": "UnknownJobState"
+                      },
+                      "ExtractDataStartJob": {
+                        "Type": "Task",
+                        "Resource": "${ExtractDataArn}",
+                        "Next": "PauseForExtractJobToRun"
+                      },
+                      "PauseForExtractJobToRun": {
+                        "Type": "Wait",
+                        "Seconds": 60,
+                        "Next": "CheckExtractJobStatus"
+                      },
+                      "CheckExtractJobStatus": {
+                        "Type": "Task",
+                        "Resource": "${AwaitExtractJobArn}",
+                        "Next": "IsExtractJobComplete"
+                      },
+                      "IsExtractJobComplete": {
+                        "Type": "Choice",
+                        "Choices": [
+                          {
+                            "Variable": "$.state",
+                            "StringEquals": "RUNNING",
+                            "Next": "PauseForExtractJobToRun"
+                          },
+                          {
+                            "Variable": "$.state",
+                            "StringEquals": "WAITING",
+                            "Next": "JobComplete"
+                          },
+                          {
+                            "Variable": "$.state",
+                            "StringEquals": "ERROR",
+                            "Next": "ErrorInJob"
+                          }
+                        ],
+                        "Default": "UnknownJobState"
+                      },
+                      "UnknownJobState": {
+                        "Type": "Fail",
+                        "Cause": "Unrecognised job stats"
+                      },
+                      "ErrorInJob": {
+                        "Type": "Fail",
+                        "Cause": "$.error"
+                      },
+                      "JobComplete": {
+                        "Type": "Succeed"
+                      }
+                    }
+                  },
+                  "End": true
+                }
+              }
+            }
           -
             InitJobArn: !GetAtt InitJobLambda.Arn
+            PartitionArn: !GetAtt PartitionStepLambda.Arn
             QueryJobStateArn: !GetAtt QueryJobStateLambda.Arn
             ExtractDataArn: !GetAtt ExtractDataLambda.Arn
             AwaitExtractJobArn: !GetAtt AwaitExtractJobLambda.Arn
