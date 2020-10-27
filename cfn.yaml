@@ -198,11 +198,16 @@ Resources:
                      "Variable": "$.state",
                      "StringEquals": "WAITING",
                      "Next": "CollectJobData"
+                   },
+                   {
+                     "Variable": "$.state",
+                     "StringEquals": "ERROR",
+                     "Next": "ErrorInJob"
                    }
                  ],
                  "Default": "UnknownJobState"
                },
-               "CollectJobData": {
+               "ExtractDataStartJob": {
                  "Type": "Task",
                  "Resource": "${ExtractDataArn}",
                  "Next": "PauseForExtractJobToRun"
@@ -229,6 +234,11 @@ Resources:
                      "Variable": "$.state",
                      "StringEquals": "WAITING",
                      "Next": "JobComplete"
+                   },
+                   {
+                     "Variable": "$.state",
+                     "StringEquals": "ERROR",
+                     "Next": "ErrorInJob"
                    }
                  ],
                  "Default": "UnknownJobState"
@@ -236,6 +246,10 @@ Resources:
                "UnknownJobState": {
                  "Type": "Fail",
                  "Cause": "Unrecognised job stats"
+               },
+               "ErrorInJob": {
+                 "Type": "Fail",
+                 "Cause": "$.error"
                },
                "JobComplete": {
                  "Type": "Succeed"

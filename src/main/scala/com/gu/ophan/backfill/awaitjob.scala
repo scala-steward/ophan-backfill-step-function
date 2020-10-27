@@ -21,7 +21,7 @@ trait AwaitJob extends SimpleHandler[JobConfig] {
       jobStatus.getState() match {
         case State.DONE if jobStatus.getError() != null =>
           logger.error(s"Job completed with error ${jobStatus.getError()}")
-          cfg.copy(state = JobState.ERROR, errorMsg = Some(jobStatus.getError().toString()))
+          cfg.copy(state = JobState.ERROR, errorMsg = Some(jobStatus.getError().getMessage()))
         case State.DONE =>
           cfg.copy(state = JobState.WAITING)
         case State.PENDING | State.RUNNING =>
