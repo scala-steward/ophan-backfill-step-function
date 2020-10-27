@@ -197,7 +197,7 @@ Resources:
                    {
                      "Variable": "$.state",
                      "StringEquals": "WAITING",
-                     "Next": "CollectJobData"
+                     "Next": "ExtractDataStartJob"
                    },
                    {
                      "Variable": "$.state",
