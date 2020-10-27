@@ -10,12 +10,8 @@ import java.time.ZoneId
 
 object ExtractDataStep extends SimpleHandler[JobConfig] {
 
-  def formatDate(dt: Instant) =
-    DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
-      .format(dt.atZone(ZoneId.of("Europe/London")))
-
   def datestamp(cfg: JobConfig) =
-    s"${formatDate(cfg.startDateInc)}--${formatDate(cfg.endDateExc)}"
+    s"${cfg.startDateInc}--${cfg.endDateExc}"
 
   def destinationURI(cfg: JobConfig)(implicit env: Env) =
     s"gs://gu-ophan-backfill-${env.stage.toLowerCase}/backfill.${datestamp(cfg)}.*.csv"

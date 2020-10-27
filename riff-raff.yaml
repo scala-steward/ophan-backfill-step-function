@@ -9,6 +9,7 @@ deployments:
       prefixStack: false
       fileName: ophan-backfill.jar
       functionNames:
+        - ophan-backfill-PartitionStepLambda-
         - ophan-backfill-InitJob-
         - ophan-backfill-QueryJobState-
         - ophan-backfill-ExtractData-

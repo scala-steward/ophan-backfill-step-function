@@ -1,14 +1,18 @@
 package com.gu.ophan.backfill
 
-import java.time.Instant
+import java.time.LocalDate.ofEpochDay
+import java.time.ZoneOffset.UTC
+import java.time.{Instant, LocalDate}
+
+import upickle.default
 
 object JobState extends Enumeration {
   val INIT, RUNNING, WAITING, ERROR, COMPLETED = Value
 }
 
 case class JobConfig(
-  startDateInc: Instant,
-  endDateExc: Instant,
+  startDateInc: LocalDate,
+  endDateExc: LocalDate,
   jobStartTime: Instant = Instant.now(),
   bqJobId: Option[String] = None,
   state: JobState.Value = JobState.INIT,
@@ -18,18 +22,24 @@ case class JobConfig(
   errorMsg: Option[String] = None) {
 
   val queryTimeDeclarations: String = s"""
-    |DECLARE startTimeInclusive TIMESTAMP DEFAULT TIMESTAMP("$startDateInc");
-    |DECLARE endTimeExclusive TIMESTAMP DEFAULT TIMESTAMP("$endDateExc");
+    |DECLARE startTimeInclusive TIMESTAMP DEFAULT TIMESTAMP("${startDateInc.atStartOfDay(UTC).toInstant}");
+    |DECLARE endTimeExclusive TIMESTAMP DEFAULT TIMESTAMP("${endDateExc.atStartOfDay(UTC).toInstant}");
   """.stripMargin
+
+  def asDayJobs: Seq[JobConfig] = {
+    for (day <- startDateInc.toEpochDay until endDateExc.toEpochDay) yield copy(startDateInc = ofEpochDay(day), endDateExc = ofEpochDay(day + 1))
+  }
 }
 
 object JobConfig {
   // sometimes you just have to admire scala ... *sometimes* ...
-  implicit val dateReader = upickle.default.readwriter[String].bimap(
-    (_: Instant).toString, Instant.parse _)
+  implicit val localDateReader: default.ReadWriter[LocalDate] =
+    upickle.default.readwriter[String].bimap[LocalDate](_.toString, LocalDate.parse)
 
-  implicit val jobState = upickle.default.readwriter[String].bimap(
-    (_: JobState.Value).toString, JobState.withName _)
+  implicit val instantReader: default.ReadWriter[Instant] =
+    upickle.default.readwriter[String].bimap[Instant](_.toString, Instant.parse)
+
+  implicit val jobState = upickle.default.readwriter[String].bimap[JobState.Value](_.toString, JobState.withName)
 
   implicit val readWriter = upickle.default.macroRW[JobConfig]
 
