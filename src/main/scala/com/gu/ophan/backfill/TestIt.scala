@@ -7,8 +7,9 @@ import java.time.temporal.ChronoUnit
 object TestIt {
   val example = """
 {
-  "startDateInc": "2020-05-10T00:00:00Z",
-  "endDateExc":   "2020-05-11T00:00:00Z",
+  "startDateInc": "2020-05-10",
+  "endDateExc":   "2020-05-11",
+  "executionId":  "dev-test",
   "async": false
 }
 """

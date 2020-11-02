@@ -191,8 +191,15 @@ Resources:
           - |
             {
               "Comment": "Ophan backfill: data extractor (extracts data from the data lake)",
-              "StartAt": "Partition",
+              "StartAt": "AddExecutionId",
               "States": {
+                "AddExecutionId": {
+                  "Type": "Pass",
+                  "Parameters": {
+                    "executionId.$": "$$.Execution.Id"
+                   },
+                  "Next": "Partition"
+                },
                 "Partition": {
                   "Type": "Task",
                   "Resource": "${PartitionArn}",

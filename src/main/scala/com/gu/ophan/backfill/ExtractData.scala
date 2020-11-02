@@ -14,7 +14,7 @@ object ExtractDataStep extends SimpleHandler[JobConfig] {
     s"${cfg.startDateInc}--${cfg.endDateExc}"
 
   def destinationURI(cfg: JobConfig)(implicit env: Env) =
-    s"gs://gu-ophan-backfill-${env.stage.toLowerCase}/backfill.${datestamp(cfg)}.*.csv"
+    s"gs://gu-ophan-backfill-${env.stage.toLowerCase}/${cfg.executionId}/backfill.${datestamp(cfg)}.*.csv"
 
   def process(cfg: JobConfig)(implicit env: Env): JobConfig = {
     val bq = new BigQuery

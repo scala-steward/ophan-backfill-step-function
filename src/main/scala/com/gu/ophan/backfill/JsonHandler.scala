@@ -41,6 +41,7 @@ abstract class JsonHandler[Input: Reader, Output: Writer] extends RequestStreamH
     val input: Input = upickle.default.read[Input](inputStream)
     implicit val env = Env()
     val res = process(input)
+    context.getLogger().log("Starting lambda: " + this.getClass().getSimpleName())
     outputStream.write(upickle.default.write(res).getBytes)
   }
 }

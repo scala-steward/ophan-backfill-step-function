@@ -2,7 +2,7 @@ package com.gu.ophan.backfill
 
 import java.time.LocalDate.ofEpochDay
 import java.time.ZoneOffset.UTC
-import java.time.{Instant, LocalDate}
+import java.time.{ Instant, LocalDate }
 
 import upickle.default
 
@@ -13,6 +13,7 @@ object JobState extends Enumeration {
 case class JobConfig(
   startDateInc: LocalDate,
   endDateExc: LocalDate,
+  executionId: String, // the step function should be configured to provide this
   jobStartTime: Instant = Instant.now(),
   bqJobId: Option[String] = None,
   state: JobState.Value = JobState.INIT,
