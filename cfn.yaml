@@ -196,7 +196,9 @@ Resources:
                 "AddExecutionId": {
                   "Type": "Pass",
                   "Parameters": {
-                    "executionId.$": "$$.Execution.Id"
+                    "startDateInc.$": "$.startDateInc",
+                    "endDateExc.$": "$.endDateExc",
+                    "executionId.$": "$$.Execution.Name"
                    },
                   "Next": "Partition"
                 },
