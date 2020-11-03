@@ -6,11 +6,10 @@ import software.constructs.Construct
 import software.amazon.awscdk.services.iam.Role
 import software.amazon.awscdk.services.iam.PolicyDocument
 import software.amazon.awscdk.services.iam.PolicyStatement
+import software.amazon.awscdk.services.lambda.SingletonFunction
+import software.amazon.awscdk.services.stepfunctions.Pass
 
-trait CdkHelpers extends Construct {
-
-//  implicit def autoBuild[T](bld: { def build(): T }): T = bld.build()
-
+object CdkHelpers {
   implicit class CfnParameterHelper(bld: CfnParameter.Builder) {
     def allowedValues(values: String*): CfnParameter.Builder =
       bld.allowedValues(values.asJava)
@@ -30,19 +29,11 @@ trait CdkHelpers extends Construct {
     def resources(args: String*) = bld.resources(args.asJava)
   }
 
-  // def policyDocument(stmts: PolicyStatement*) =
-  //   PolicyDocument.Builder.create().statements(stmts.asJava).build()
+  implicit class SingletonFunctionHelper(bld: SingletonFunction.Builder) {
+    def environment(args: (String, String)*) = bld.environment(args.toMap.asJava)
+  }
 
-  // def policyStatement(actions: Seq[String], resources: Seq[String]) =
-  //   PolicyStatement.Builder.create()
-  //     .actions(actions.asJava)
-  //     .resources(resources.asJava)
-  //     .build()
-
-  // def param(name: String, `type`: String = "String")
-  //   (op: CfnParameter.Builder => CfnParameter.Builder = identity) =
-  //   op(CfnParameter.Builder.create(this, name))
-  //     .`type`(`type`)
-  //     .build()
-
+  implicit class PassHelper(bld: Pass.Builder) {
+    def parameters(args: (String, String)*) = bld.parameters(args.toMap.asJava)
+  }
 }
