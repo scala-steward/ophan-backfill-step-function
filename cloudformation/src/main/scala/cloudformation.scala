@@ -5,66 +5,97 @@ import scala.jdk.CollectionConverters._
 import software.amazon.awscdk.core.{ App => CdkApp, _ }
 import software.amazon.awscdk.services.iam._
 
-class CloudformationStack(scope: Construct, id: String)
-    extends Stack(scope, id)
+class CloudformationStack(scope: Construct, id: String, props: StackProps)
+    extends Stack(scope, id, props)
     with CdkHelpers {
 
-  param("BuildId")()
-  param("Stack")(
-    _.description("Stack name")
-      .defaultValue("ophan-backfill")
-  )
-  param("App")(
-    _.description("Application name")
-      .defaultValue("ophan-backfill")
-  )
-  val stageParam = param("Stage")(
-    _.description("Stage name")
-      .defaultValue("CODE")
-      .withAllowedValues("CODE", "PROD")
-  )
-  param("DeployBucket")(
-    _.description("Bucket where RiffRaff uploads artifacts on deploy")
-      .defaultValue("ophan-dist")
-  )
+  lazy val bigQueryAuthParamArn =
+    s"arn:aws:ssm:eu-west-1:021353022223:parameter/Ophan/backfill/${stageParam.getValueAsString()}/google-creds.json"
+
+  CfnParameter.Builder.create(this, "BuildId")
+    .build()
+
+  CfnParameter.Builder.create(this, "Stack")
+    .description("Stack name")
+    .defaultValue("ophan")
+    .build()
+
+  CfnParameter.Builder.create(this, "App")
+    .description("Application name")
+    .defaultValue("ophan-backfill")
+    .build()
+
+  val stageParam = CfnParameter.Builder.create(this, "Stage")
+    .description("Stage name")
+    .allowedValues("CODE", "PROD")
+    .defaultValue("CODE")
+    .build()
+
+  CfnParameter.Builder.create(this, "DeployBucket")
+    .description("Bucket where RiffRaff uploads artifacts on deploy")
+    .defaultValue("ophan-dist")
+    .build()
+
+  val executionRolePolicies = Map(
+    "logs" -> PolicyDocument.Builder.create()
+      .statements(
+        PolicyStatement.Builder.create()
+          .actions(
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents")
+          .resources("arn:aws:logs:*:*:*")
+          .build()
+      ).build(),
+    "lambda" -> PolicyDocument.Builder.create()
+      .statements(
+        PolicyStatement.Builder.create()
+          .actions("lambda:InvokeFunction")
+          .resources("*")
+          .build()
+      ).build(),
+    "params" -> PolicyDocument.Builder.create()
+      .statements(
+        PolicyStatement.Builder.create()
+          .actions("ssm:GetParameter")
+          .resources(bigQueryAuthParamArn)
+          .build()
+      ).build(),
+  ).asJava
 
   val executionRole = Role.Builder.create(this, "ExecutionRole")
     .assumedBy(new ServicePrincipal("lambda.amazonaws.com"))
     .path("/")
-    .withInlinePolicies(
-      "logs" -> policyDocument(
-        policyStatement(
-            actions = List(
-              "logs:CreateLogGroup",
-              "logs:CreateLogStream",
-              "logs:PutLogEvents"),
-            resources = List(
-              "arn:aws:logs:*:*:*"))),
-      "lambda" -> policyDocument(
-        policyStatement(
-          actions = List("lambda:InvokeFunction"),
-          resources = List("*"))),
-      "params" -> policyDocument(
-        policyStatement(
-          actions = List("ssm:GetParameter"),
-          resources = List(
-            s"arn:aws:ssm:eu-west-1:021353022223:parameter/Ophan/backfill/${stageParam.getValueAsString()}/google-creds.json"))))
+    .inlinePolicies(executionRolePolicies)
     .build()
+
+  val statesExecutionPolicies = Map(
+    "StatesExecutionPolicy" -> PolicyDocument.Builder.create()
+      .statements(PolicyStatement.Builder.create()
+        .actions("lambda:InvokeFunction")
+        .resources("*")
+        .build()
+      ).build()
+  ).asJava
 
   val statesExecutionRole = Role.Builder.create(this, "StatesExecutionRole")
     .assumedBy(new ServicePrincipal(s"states.${getRegion()}.amazonaws.com"))
     .path("/")
-    .withInlinePolicies(
-      "StatesExecutionPolicy" -> policyDocument(
-        policyStatement(actions = List("lambda:InvokeFunction"),
-          resources = List("*"))))
-   .build()
+    .inlinePolicies(statesExecutionPolicies)
+    .build()
 }
 
 object CloudformationApp {
   def main(args: Array[String]): Unit = {
     val app = new CdkApp()
-    new CloudformationStack(app, "ophan-backfill")
+    val props = StackProps.builder()
+      .env(Environment.builder()
+        .account("021353022223")
+        .region("eu-west-1")
+        .build()
+      ).build()
+
+    new CloudformationStack(app, "ophan-backfill-PROD", props)
     app.synth()
   }
 }
