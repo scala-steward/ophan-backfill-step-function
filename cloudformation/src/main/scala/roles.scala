@@ -3,13 +3,13 @@ package com.gu.ophan.backfill.cfn
 import software.amazon.awscdk.services.iam.{
   PolicyDocument, PolicyStatement, Role, ServicePrincipal
 }
-
 import scala.jdk.CollectionConverters._
+import software.amazon.awscdk.core.Stack
+
 import CdkHelpers._
-import software.constructs.Construct
 
 class BackfillRoles(
-  scope: Construct,
+  scope: Stack,
   params: BackfillParams,
   region: String
 ) {

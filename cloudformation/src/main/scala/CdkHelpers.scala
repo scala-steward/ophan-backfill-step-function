@@ -6,7 +6,7 @@ import software.constructs.Construct
 import software.amazon.awscdk.services.iam.Role
 import software.amazon.awscdk.services.iam.PolicyDocument
 import software.amazon.awscdk.services.iam.PolicyStatement
-import software.amazon.awscdk.services.lambda.SingletonFunction
+import software.amazon.awscdk.services.lambda.Function
 import software.amazon.awscdk.services.stepfunctions.Pass
 
 object CdkHelpers {
@@ -29,7 +29,7 @@ object CdkHelpers {
     def resources(args: String*) = bld.resources(args.asJava)
   }
 
-  implicit class SingletonFunctionHelper(bld: SingletonFunction.Builder) {
+  implicit class FunctionHelper(bld: Function.Builder) {
     def environment(args: (String, String)*) = bld.environment(args.toMap.asJava)
   }
 

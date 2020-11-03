@@ -1,5 +1,7 @@
 package com.gu.ophan.backfill.cfn
 
+import com.softwaremill.macwire._
+
 import scala.jdk.CollectionConverters._
 
 import software.amazon.awscdk.core.{ App => CdkApp, _ }
@@ -14,10 +16,16 @@ import CdkHelpers._
 class CloudformationStack(scope: Construct, id: String, props: StackProps)
     extends Stack(scope, id, props) {
 
-  val params = new BackfillParams(this)
-  val roles = new BackfillRoles(this, params, getRegion())
-  val lambdas = new BackfillLambdas(this, params, roles)
-  val states = new BackfillStates(this, lambdas)
+  lazy val stack = this
+
+  lazy val params = wire[BackfillParams]
+  lazy val roles = wire[BackfillRoles]
+  lazy val lambdas = wire[BackfillLambdas]
+  lazy val states = wire[BackfillStates]
+
+  StateMachine.Builder.create(stack, "Ophan-Backfill-Extractor")
+    .definition(states.initialSteps)
+    .build()
 }
 
 object CloudformationApp {

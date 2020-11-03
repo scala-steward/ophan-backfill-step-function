@@ -1,11 +1,11 @@
 package com.gu.ophan.backfill.cfn
 
-import software.constructs.Construct
 import software.amazon.awscdk.core.CfnParameter
+import software.amazon.awscdk.core.Stack
 
 import CdkHelpers._
 
-class BackfillParams(scope: Construct) {
+class BackfillParams(scope: Stack) {
   lazy val bigQueryAuthParamArn =
     s"arn:aws:ssm:eu-west-1:021353022223:parameter/Ophan/backfill/${stageParam.getValueAsString()}/google-creds.json"
 
