@@ -1,18 +1,32 @@
-# Welcome to your CDK Java project!
+# Cloudformation for Ophan Backfill Step Function
 
-This is a blank project for Java development with CDK.
+This directory uses Scala-code to define the cloudformation with the
+help of the AWS CDK Java library:
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+  https://docs.aws.amazon.com/cdk/latest/guide/work-with-cdk-java.html
+  
+# Generating the cloudformation
 
-It is a [Maven](https://maven.apache.org/) based project, so you can open this project with any Maven compatible Java IDE to build and run tests.
+In general, you shouldn't need to do this as it is configured to be
+part of the teamcity & riffraff build and deploy process.
 
-## Useful commands
+However, if you need to generate the cloudformation either for testing
+or debugging, and assuming you have the `cdk` command installed, run:
 
- * `mvn package`     compile and run tests
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+```
+$ cdk synth
+```
 
-Enjoy!
+This will read the `cdk.json` file to determine how to run the code to
+produce the cloudformation.
+
+# Seeing what has changed
+
+If you make changes, you can use:
+
+```
+$ cdk diff --profile ophan
+```
+
+to see what would be modified if the cloudformation was to be
+deployed.
