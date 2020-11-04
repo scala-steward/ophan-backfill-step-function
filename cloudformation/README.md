@@ -25,8 +25,14 @@ produce the cloudformation.
 If you make changes, you can use:
 
 ```
-$ cdk diff --profile ophan
+$ cdk diff
 ```
 
 to see what would be modified if the cloudformation was to be
 deployed.
+
+If you want to deploy it immediately, you can do:
+
+```
+$ cdk deploy
+```

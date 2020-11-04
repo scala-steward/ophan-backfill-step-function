@@ -39,4 +39,4 @@ assemblyMergeStrategy in assembly := {
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffArtifactResources += (file("cfn.yaml"), "cloudformation/cfn.yaml")
+riffRaffArtifactResources += (file("cloudformation/cloudformation.yaml"), "cloudformation/cfn.yaml")

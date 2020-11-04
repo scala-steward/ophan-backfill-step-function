@@ -10,9 +10,9 @@ deployments:
       fileName: ophan-backfill.jar
       functionNames:
         - ophan-backfill-PartitionStepLambda-
-        - ophan-backfill-InitJob-
-        - ophan-backfill-QueryJobState-
-        - ophan-backfill-ExtractData-
+        - ophan-backfill-InitJobLambda-
+        - ophan-backfill-QueryJobStateLambda-
+        - ophan-backfill-ExtractDataLambda-
         - ophan-backfill-AwaitExtractJobLambda-
   cloudformation:
     type: cloud-formation
