@@ -38,7 +38,7 @@ object CloudformationApp {
         .build()
       ).build()
 
-    val stackName = "ophan-backfill-cdk-PROD"
+    val stackName = "ophan-backfill-PROD"
 
     new CloudformationStack(app, stackName, props)
     app.synth()
