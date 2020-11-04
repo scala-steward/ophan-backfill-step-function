@@ -38,7 +38,7 @@ object CloudformationApp {
         .build()
       ).build()
 
-    new CloudformationStack(app, "ophan-backfill-PROD", props)
+    new CloudformationStack(app, "ophan-backfill-cdk-PROD", props)
     app.synth()
   }
 }

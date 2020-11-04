@@ -57,16 +57,21 @@ class BackfillStates(scope: Stack, lambdas: BackfillLambdas) {
     Chain.start(initialiser)
       .next(pauseState)
       .next(checker)
-      .next(Choice.Builder.create(scope, name)
+      .next(Choice.Builder.create(scope, s"$name-Choice")
         .build()
         .when(Condition.stringEquals("$.state", "RUNNING"), pauseState)
         .when(Condition.stringEquals("$.state", "WAITING"), nextState)
-        .when(Condition.stringEquals("$.state", "ERROR"), errorState))
+        .when(Condition.stringEquals("$.state", "ERROR"), errorState)
+        .otherwise(unknownJobState))
   }
+
+  lazy val unknownJobState = Fail.Builder.create(scope, "UnknownJobState")
+    .build()
 
   def LambdaTask(name: String, lambda: IFunction) =
     LambdaInvoke.Builder.create(scope, name)
       .lambdaFunction(lambda)
+      .payloadResponseOnly(true) // don't populate output with meta data
       .build()
 
   // in order to stash the resulting data into a bucket path that is
@@ -77,14 +82,14 @@ class BackfillStates(scope: Stack, lambdas: BackfillLambdas) {
   // the way out to add the execution id.
 
   val addExecutionId =
-    Pass.Builder.create(scope, "addExecutionId")
+    Pass.Builder.create(scope, "AddExecutionId")
       .parameters(
         "startDateInc.$" -> "$.startDateInc",  // \____ retain these two parameters
         "endDateExc.$" -> "$.endDateExc",      // /
         "executionId.$" -> "$$.Execution.Name" // `$$` is the context object for the step function
       ).build()
 
-  val partitionTask = LambdaTask("PartitionState", lambdas.stepPartitionTimespan)
+  val partitionTask = LambdaTask("Partition", lambdas.stepPartitionTimespan)
 
   // this is the set of states that is applied to each partition of
   // the time frame being extracted.

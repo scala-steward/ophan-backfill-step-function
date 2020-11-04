@@ -33,7 +33,7 @@ class BackfillLambdas(
     timeout: Duration = Duration.minutes(1)
   ) =
     Function.Builder.create(scope, name)
-      .functionName(s"${params.appParam.getValueAsString()}-$name-${params.stageParam.getValueAsString()}")
+      .functionName(s"${scope.getStackName()}-$name-${params.stageParam.getValueAsString()}")
       .code(lambdaCodeBucket)
       .handler(handler)
       .runtime(Runtime.JAVA_8)
