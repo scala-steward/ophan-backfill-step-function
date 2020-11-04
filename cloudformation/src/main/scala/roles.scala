@@ -11,7 +11,6 @@ import CdkHelpers._
 class BackfillRoles(
   scope: Stack,
   params: BackfillParams,
-  region: String
 ) {
   val executionRolePolicies = Map(
     "logs" -> PolicyDocument.Builder.create()
@@ -56,7 +55,7 @@ class BackfillRoles(
   ).asJava
 
   val statesExecutionRole = Role.Builder.create(scope, "StatesExecutionRole")
-    .assumedBy(new ServicePrincipal(s"states.${region}.amazonaws.com"))
+    .assumedBy(new ServicePrincipal(s"states.${scope.getRegion}.amazonaws.com"))
     .path("/")
     .inlinePolicies(statesExecutionPolicies)
     .build()
