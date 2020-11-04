@@ -16,7 +16,32 @@ class BackfillStates(scope: Stack, lambdas: BackfillLambdas) {
     .cause("$.error")
     .build()
 
-  def waitFor(
+  /**
+    * WaitFor defines the following construct:
+    *    +-------------+
+    *    |[initialiser]|     < sets up the job that
+    *    +-------------+         is to be waited for >
+    *          |
+    *          |
+    *       +-----+
+    *  ____ |pause|
+    * /     +-----+
+    * |        |
+    * |        |
+    * |        |
+    * |   +---------+
+    * |   |[checker]|  < assesses whether the job has finished
+    * |   +---------+          or not and sets status value >
+    * |        |
+    * |        |                    yes           +-----------+
+    * |   is state complete? ---------------------|[nextState]|
+    * |      /          \                         +-----------+
+    * |     /  no        \                 +------------+
+    * \____/              \_______________ |[errorState]|
+    *                           error      +------------+
+    */
+
+  def WaitFor(
     name: String,
     initialiser: IChainable,
     checker: IChainable,
@@ -39,7 +64,7 @@ class BackfillStates(scope: Stack, lambdas: BackfillLambdas) {
         .when(Condition.stringEquals("$.state", "ERROR"), errorState))
   }
 
-  def lambdaStep(name: String, lambda: IFunction) =
+  def LambdaTask(name: String, lambda: IFunction) =
     LambdaInvoke.Builder.create(scope, name)
       .lambdaFunction(lambda)
       .build()
@@ -59,20 +84,20 @@ class BackfillStates(scope: Stack, lambdas: BackfillLambdas) {
         "executionId.$" -> "$$.Execution.Name" // `$$` is the context object for the step function
       ).build()
 
-  val partitionTask = lambdaStep("PartitionState", lambdas.stepPartitionTimespan)
+  val partitionTask = LambdaTask("PartitionState", lambdas.stepPartitionTimespan)
 
   // this is the set of states that is applied to each partition of
   // the time frame being extracted.
   lazy val queryBigQuery =
-    waitFor(name = "WaitForInitJob",
-      initialiser = lambdaStep("InitJobTask", lambdas.stepInitJob),
-      checker = lambdaStep("CheckQueryJobStatus", lambdas.stepQueryJobState),
+    WaitFor(name = "WaitForInitJob",
+      initialiser = LambdaTask("InitJobTask", lambdas.stepInitJob),
+      checker = LambdaTask("CheckQueryJobStatus", lambdas.stepQueryJobState),
       nextState = extractData)
 
   lazy val extractData =
-    waitFor(name = "WaitForExtractDataJob",
-      initialiser = lambdaStep("ExtractDataStartJob", lambdas.stepExtractData),
-      checker = lambdaStep("CheckExtractJobStatus", lambdas.stepAwaitExtractJob),
+    WaitFor(name = "WaitForExtractDataJob",
+      initialiser = LambdaTask("ExtractDataStartJob", lambdas.stepExtractData),
+      checker = LambdaTask("CheckExtractJobStatus", lambdas.stepAwaitExtractJob),
       nextState = Succeed.Builder.create(scope, "DataExtractedSuccessfully")
         .build()
     )
