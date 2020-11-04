@@ -1,5 +1,5 @@
 {
-  "app": "sbt run",
+  "app": "sbt run >/dev/null",
   "context": {
     "@aws-cdk/core:enableStackNameDuplicates": "true",
     "aws-cdk:enableDiffNoFail": "true",
