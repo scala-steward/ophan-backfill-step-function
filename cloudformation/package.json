@@ -1,0 +1,13 @@
+{
+  "name": "ophan-backfill-cdk",
+  "version": "0.1.0",
+  "bin": {
+    "cdk": "bin/cdk.js"
+  },
+  "scripts": {
+    "compile": "cdk synth > cloudformation.yaml"
+  },
+  "devDependencies": {
+    "aws-cdk": "^1.16.2"
+  }
+}
