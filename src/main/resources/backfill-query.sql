@@ -8,7 +8,10 @@ FROM (SELECT
     -- View-specific factors:
     timestamp_add(timestamp_trunc(event_timestamp, hour), INTERVAL EXTRACT(minute from event_timestamp) - MOD(EXTRACT(minute FROM event_timestamp), 30) minute) as bucket_start,
     range_bucket(attention_time - 1, array[0,1,2,3,4,5,10,15,20,25,30,40,50,60,70,80,90,100,110,120,180,240,300,360,420,480,540,600,900,1200]) AS attention_bucket,
-    referrer_significant_site,
+    (CASE
+         WHEN referrer_significant_site = 'OTHER' THEN NULL
+         ELSE referrer_significant_site
+     END) AS referrer_significant_site,
     (CASE
          WHEN country_code IN ('GB','US','AU','IN','CA','GNM') THEN country_code
          WHEN country_code IN ('AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE') THEN 'EU27'
