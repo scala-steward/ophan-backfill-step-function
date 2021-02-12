@@ -3,6 +3,8 @@ package com.gu.ophan.backfill
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
+import java.time.LocalDate
+
 class ExtractDataStepTest extends AnyFlatSpec with should.Matchers {
 
   val MaxBytesAvailableForSingleFilenameLine: Int = {
@@ -26,7 +28,7 @@ class ExtractDataStepTest extends AnyFlatSpec with should.Matchers {
 
   "Dumped filenames" should "be small enough for 2-years-worth of filenames to fit in AWS Step Functions state" in {
     MaxSizeOfWildcardFormattedFileName shouldBe 21 // yes, that is what the big sum ends up at
-
-    ExtractDataStep.FileNameFormat.length should be <= MaxSizeOfWildcardFormattedFileName
+    val now = LocalDate.now()
+    ExtractDataStep.fileNameFormat(now.minusDays(1), now).length should be <= MaxSizeOfWildcardFormattedFileName
   }
 }
