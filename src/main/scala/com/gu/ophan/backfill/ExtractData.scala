@@ -9,13 +9,13 @@ import java.time.format.DateTimeFormatter
 
 object ExtractDataStep extends SimpleHandler[JobConfig] {
 
-  val FileNameFormat = "backfill.*.csv"
+  def fileNameFormat(startDateInc: LocalDate, endDateExc: LocalDate) = s"${startDateInc}_${endDateExc.toEpochDay - startDateInc.toEpochDay}.*.csv"
 
   def datestamp(cfg: JobConfig) =
     s"${cfg.startDateInc}--${cfg.endDateExc}"
 
   def destinationURI(cfg: JobConfig)(implicit env: Env) =
-    s"gs://gu-ophan-backfill-${env.stage.toLowerCase}/${cfg.executionId}_${datestamp(cfg)}/$FileNameFormat"
+    s"gs://gu-ophan-backfill-${env.stage.toLowerCase}/${cfg.executionId}/${fileNameFormat(cfg.startDateInc, cfg.endDateExc)}"
 
   def process(cfg: JobConfig)(implicit env: Env): JobConfig = {
     val bq = new BigQuery
