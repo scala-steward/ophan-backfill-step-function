@@ -116,9 +116,13 @@ class BackfillStates(scope: Stack, lambdas: BackfillLambdas) {
       .build()
       .iterator(queryBigQuery)
 
+  lazy val createManifestFileTask =
+    LambdaTask("CreateManifestFile", lambdas.stepCreateManifestFile)
+
   lazy val initialSteps =
     Chain.start(addExecutionId)
       .next(partitionTask)
       .next(mapOverPartitionTask)
+      .next(createManifestFileTask)
 
 }

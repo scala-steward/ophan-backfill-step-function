@@ -66,4 +66,8 @@ class BackfillLambdas(
     description = "split the job timespan into smaller jobs to make the data easier to find in GCS",
     handler = "com.gu.ophan.backfill.PartitionStep::handleRequest")
 
+  val stepCreateManifestFile = stepLambda(name = "ManifestFileLambda",
+    description = "create a manifest file which describes how many documents should be created for each date",
+    handler = "com.gu.ophan.backfill.ManifestFileStep::handleRequest")
+
 }
