@@ -20,7 +20,8 @@ case class JobConfig(
   dataTable: Option[(String, String)] = None,
   destinationUri: Option[String] = None,
   async: Boolean = true,
-  errorMsg: Option[String] = None) {
+  errorMsg: Option[String] = None,
+  documentCount: Option[Long] = None) {
 
   val queryTimeDeclarations: String = s"""
     |DECLARE startTimeInclusive TIMESTAMP DEFAULT TIMESTAMP("${startDateInc.atStartOfDay(UTC).toInstant}");

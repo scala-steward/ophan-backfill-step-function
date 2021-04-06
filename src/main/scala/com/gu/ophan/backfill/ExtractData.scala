@@ -31,6 +31,7 @@ object ExtractDataStep extends SimpleHandler[JobConfig] {
     cfg.copy(
       destinationUri = Some(destUri),
       state = JobState.RUNNING,
-      bqJobId = Some(job.getJobId().getJob()))
+      bqJobId = Some(job.getJobId().getJob()),
+      documentCount = Some(table.getNumRows().longValue()))
   }
 }
