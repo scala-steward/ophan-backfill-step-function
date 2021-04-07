@@ -1,13 +1,9 @@
 package com.gu.ophan.backfill
 
-import java.io.{ BufferedWriter, FileWriter }
 import java.time.LocalDate
 
 import upickle.default._
-import java.nio.ByteBuffer
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
+import java.nio.channels.Channels
 
 object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
 
@@ -21,37 +17,35 @@ object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
         ManifestFileLine(jobConfig.startDateInc, jobConfig.documentCount)
       }
 
-      uploadObject(prefix = prefix, manifest = manifestLines) match {
-        case Success(manifestFile) => manifestFile
-        case Failure(err) => err.toString
-      }
-    }).getOrElse("empty")
+      uploadObject(prefix = prefix, manifest = manifestLines)
+    }).getOrElse("<<EMPTY>>")
   }
 
   import com.google.cloud.storage.BlobId
   import com.google.cloud.storage.BlobInfo
   import com.google.cloud.storage.StorageOptions
-  import java.io.IOException
-  import java.nio.file.Files
-  import java.nio.file.Paths
 
   def uploadObject(
     prefix: String,
     manifest: Seq[ManifestFileLine],
     projectId: String = "datatech-platform-prod",
     bucketName: String = "gu-ophan-backfill-prod",
-    objectName: String = "manifest.json"): Try[String] = Try {
+    objectName: String = "manifest.json"): String = {
 
     val storage = StorageOptions.newBuilder.setProjectId(projectId).build.getService
-    val blobId = BlobId.of(bucketName, objectName)
+    val blobId = BlobId.of(bucketName, prefix + "/" + objectName)
     val blobInfo = BlobInfo.newBuilder(blobId).build
 
-    val w = storage.writer(blobInfo)
-    val manifestAsJson = ByteBuffer.wrap(upickle.default.write(manifest).getBytes)
-    w.write(manifestAsJson)
-    w.close()
+    logger.info(s"writing manifest file: ${blobInfo.getName()}")
 
-    blobInfo.toString
+    val out = Channels.newWriter(storage.writer(blobInfo), "UTF-8")
+
+    try {
+      upickle.default.writeTo(manifest, out)
+    } finally {
+      out.close()
+    }
+    blobInfo.getName()
   }
 }
 
