@@ -1,18 +1,31 @@
 package com.gu.ophan.backfill
 
-import java.io.{BufferedWriter, FileWriter}
+import java.io.{ BufferedWriter, FileWriter }
 import java.time.LocalDate
+
+import upickle.default._
+import java.nio.ByteBuffer
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
 
 object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
 
   override def process(input: Seq[JobConfig])(implicit env: Env): String = {
-    logger.info("creating manifest file")
-    val manifestLines = input.map { jobConfig =>
-      ManifestFileLine(jobConfig.startDateInc, jobConfig.documentCount)
-    }
+    (for (cfg <- input.headOption) yield {
+      logger.info("creating manifest file")
 
-    UploadObject.uploadObject(manifest = manifestLines)
-    "complete"
+      val prefix = ExtractDataStep.pathPrefix(cfg)
+
+      val manifestLines = input.map { jobConfig =>
+        ManifestFileLine(jobConfig.startDateInc, jobConfig.documentCount)
+      }
+
+      uploadObject(prefix = prefix, manifest = manifestLines) match {
+        case Success(manifestFile) => manifestFile
+        case Failure(err) => err.toString
+      }
+    }).getOrElse("empty")
   }
 
   import com.google.cloud.storage.BlobId
@@ -22,35 +35,30 @@ object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
   import java.nio.file.Files
   import java.nio.file.Paths
 
-  //https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-code-sample
-  object UploadObject {
-    @throws[IOException]
-    def uploadObject(
-      projectId: String = "datatech-platform-prod",
-      bucketName: String = "gu-ophan-backfill-prod/debug-1st-feb", //todo
-      objectName: String = "manifest.json",
-      manifest: Seq[ManifestFileLine]): Unit = { // The ID of your GCP project
-      // String projectId = "your-project-id";
-      // The ID of your GCS bucket
-      // String bucketName = "your-unique-bucket-name";
-      // The ID of your GCS object
-      // String objectName = "your-object-name";
-      // The path to your file to upload
-      // String filePath = "path/to/your/file"
-      val storage = StorageOptions.newBuilder.setProjectId(projectId).build.getService
-      val blobId = BlobId.of(bucketName, objectName)
-      val blobInfo = BlobInfo.newBuilder(blobId).build
+  def uploadObject(
+    prefix: String,
+    manifest: Seq[ManifestFileLine],
+    projectId: String = "datatech-platform-prod",
+    bucketName: String = "gu-ophan-backfill-prod",
+    objectName: String = "manifest.json"): Try[String] = Try {
 
-      val w: BufferedWriter = new BufferedWriter(new FileWriter(objectName))
-      val manifestAsJson = upickle.default.write[Seq[ManifestFileLine]](manifest)
-      w.write(manifestAsJson)
-      w.close()
+    val storage = StorageOptions.newBuilder.setProjectId(projectId).build.getService
+    val blobId = BlobId.of(bucketName, objectName)
+    val blobInfo = BlobInfo.newBuilder(blobId).build
 
-      storage.create(blobInfo, Files.readAllBytes(Paths.get(objectName)))
-      System.out.println("File " + " uploaded to bucket " + bucketName + " as " + objectName)
-    }
+    val w = storage.writer(blobInfo)
+    val manifestAsJson = ByteBuffer.wrap(upickle.default.write(manifest).getBytes)
+    w.write(manifestAsJson)
+    w.close()
+
+    blobInfo.toString
   }
-
 }
 
 case class ManifestFileLine(date: LocalDate, count: Option[Long])
+
+object ManifestFileLine {
+  import JsonHelpers._
+  implicit val writer: upickle.default.Writer[ManifestFileLine] =
+    upickle.default.macroW[ManifestFileLine]
+}

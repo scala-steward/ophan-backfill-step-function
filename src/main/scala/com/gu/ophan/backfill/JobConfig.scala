@@ -34,14 +34,10 @@ case class JobConfig(
 }
 
 object JobConfig {
-  // sometimes you just have to admire scala ... *sometimes* ...
-  implicit val localDateReader: default.ReadWriter[LocalDate] =
-    upickle.default.readwriter[String].bimap[LocalDate](_.toString, LocalDate.parse)
+  import JsonHelpers._
 
-  implicit val instantReader: default.ReadWriter[Instant] =
-    upickle.default.readwriter[String].bimap[Instant](_.toString, Instant.parse)
-
-  implicit val jobState = upickle.default.readwriter[String].bimap[JobState.Value](_.toString, JobState.withName)
+  implicit val jobState = upickle.default.readwriter[String]
+    .bimap[JobState.Value](_.toString, JobState.withName)
 
   implicit val readWriter = upickle.default.macroRW[JobConfig]
 

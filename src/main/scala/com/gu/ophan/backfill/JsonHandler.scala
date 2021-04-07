@@ -6,6 +6,8 @@ import com.amazonaws.services.lambda.runtime.{ Context, RequestStreamHandler }
 import java.io.InputStream
 import java.io.OutputStream
 import upickle.default.{ Reader, Writer, ReadWriter }
+import java.time.LocalDate
+import java.time.Instant
 
 /**
  * A trait that handles some of the housekeeping of deserialising
@@ -48,3 +50,12 @@ abstract class JsonHandler[Input: Reader, Output: Writer] extends RequestStreamH
 
 // same input and output type
 abstract class SimpleHandler[T: ReadWriter] extends JsonHandler[T, T]
+
+object JsonHelpers {
+  // sometimes you just have to admire scala ... *sometimes* ...
+  implicit val localDateReader: upickle.default.ReadWriter[LocalDate] =
+    upickle.default.readwriter[String].bimap[LocalDate](_.toString, LocalDate.parse)
+
+  implicit val instantReader: upickle.default.ReadWriter[Instant] =
+    upickle.default.readwriter[String].bimap[Instant](_.toString, Instant.parse)
+}

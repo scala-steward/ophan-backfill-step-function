@@ -14,8 +14,11 @@ object ExtractDataStep extends SimpleHandler[JobConfig] {
   def datestamp(cfg: JobConfig) =
     s"${cfg.startDateInc}--${cfg.endDateExc}"
 
+  def pathPrefix(cfg: JobConfig)(implicit env: Env) =
+    s"gs://gu-ophan-backfill-${env.stage.toLowerCase}/${cfg.executionId}"
+
   def destinationURI(cfg: JobConfig)(implicit env: Env) =
-    s"gs://gu-ophan-backfill-${env.stage.toLowerCase}/${cfg.executionId}/${fileNameFormat(cfg.startDateInc, cfg.endDateExc)}"
+    s"${pathPrefix(cfg)}/${fileNameFormat(cfg.startDateInc, cfg.endDateExc)}"
 
   def process(cfg: JobConfig)(implicit env: Env): JobConfig = {
     val bq = new BigQuery
