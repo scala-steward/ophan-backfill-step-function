@@ -16,7 +16,7 @@ object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
       val prefix = ExtractDataStep.pathPrefix(cfg)
 
       val manifestLines = input.map { jobConfig =>
-        ManifestFileLine(jobConfig.startDateInc, jobConfig.documentCount)
+        ManifestFileLine(jobConfig.startDateInc, jobConfig.documentCount.get)
       }
 
       uploadObject(prefix = prefix, manifest = manifestLines)
@@ -51,7 +51,7 @@ object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
   }
 }
 
-case class ManifestFileLine(date: LocalDate, count: Option[Long])
+case class ManifestFileLine(date: LocalDate, count: Long)
 
 object ManifestFileLine {
   import JsonHelpers._
