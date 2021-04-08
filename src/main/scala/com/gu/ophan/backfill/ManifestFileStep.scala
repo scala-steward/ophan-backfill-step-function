@@ -19,15 +19,18 @@ object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
         ManifestFileLine(jobConfig.startDateInc, jobConfig.documentCount.get)
       }
 
-      uploadObject(prefix = prefix, manifest = manifestLines)
+      uploadObject(
+        bucketName = ExtractDataStep.bucketName,
+        prefix = prefix,
+        manifest = manifestLines)
     }).getOrElse("<<EMPTY>>")
   }
 
   def uploadObject(
     prefix: String,
+    bucketName: String,
     manifest: Seq[ManifestFileLine],
     projectId: String = "datatech-platform-prod",
-    bucketName: String = "gu-ophan-backfill-prod",
     objectName: String = "manifest.json")(implicit env: Env): String = {
 
     val storage = StorageOptions.newBuilder
