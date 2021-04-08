@@ -1,9 +1,5 @@
 package com.gu.ophan.backfill
 
-import java.time.Instant
-import java.io.ByteArrayInputStream
-import java.time.temporal.ChronoUnit
-
 object TestIt {
   val example = """
 {
@@ -22,10 +18,11 @@ object TestIt {
       InitBackfillStep :: AwaitQueryJobStep :: ExtractDataStep ::
         AwaitExtractJobStep :: Nil
 
-    steps.foldLeft(cfg) { (cfg, step) =>
+    val res = steps.foldLeft(cfg) { (cfg, step) =>
       val res = step.process(cfg)
       println(res)
       res
     }
+    println(ManifestFileStep.process(res :: Nil))
   }
 }

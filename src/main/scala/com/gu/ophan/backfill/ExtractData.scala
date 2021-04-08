@@ -1,7 +1,6 @@
 package com.gu.ophan.backfill
 
-import java.time.{ Instant, LocalDate, ZoneId }
-import java.time.format.DateTimeFormatter
+import java.time.LocalDate
 
 /**
  * Step 3: Extract data from temporary table created during job
@@ -14,8 +13,12 @@ object ExtractDataStep extends SimpleHandler[JobConfig] {
   def datestamp(cfg: JobConfig) =
     s"${cfg.startDateInc}--${cfg.endDateExc}"
 
+  def pathPrefix(cfg: JobConfig)(implicit env: Env) = cfg.executionId
+
+  def bucketName(implicit env: Env) = s"gu-ophan-backfill-${env.stage.toLowerCase}"
+
   def destinationURI(cfg: JobConfig)(implicit env: Env) =
-    s"gs://gu-ophan-backfill-${env.stage.toLowerCase}/${cfg.executionId}/${fileNameFormat(cfg.startDateInc, cfg.endDateExc)}"
+    s"gs://${bucketName}/${pathPrefix(cfg)}/${fileNameFormat(cfg.startDateInc, cfg.endDateExc)}"
 
   def process(cfg: JobConfig)(implicit env: Env): JobConfig = {
     val bq = new BigQuery
@@ -31,6 +34,7 @@ object ExtractDataStep extends SimpleHandler[JobConfig] {
     cfg.copy(
       destinationUri = Some(destUri),
       state = JobState.RUNNING,
-      bqJobId = Some(job.getJobId().getJob()))
+      bqJobId = Some(job.getJobId().getJob()),
+      documentCount = Some(table.getNumRows().longValue()))
   }
 }

@@ -15,7 +15,8 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-encoding", "UTF-8",
   "-target:jvm-1.8",
-  "-Ywarn-dead-code"
+  "-Ywarn-dead-code",
+  "-Wunused:imports"
 )
 
 libraryDependencies ++= Seq(
@@ -24,6 +25,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-ssm" % "1.11.883",
   "com.lihaoyi" %% "upickle" % "1.2.2",
   "com.google.cloud" % "google-cloud-bigquery" % "1.122.2",
+  "com.google.cloud" % "google-cloud-storage" % "1.113.14",
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.13.3",
   "org.slf4j" % "slf4j-api" % "1.7.30",
   "org.scalatest" %% "scalatest" % "3.2.2" % Test

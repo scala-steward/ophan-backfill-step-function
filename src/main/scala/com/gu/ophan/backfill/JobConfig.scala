@@ -20,7 +20,8 @@ case class JobConfig(
   dataTable: Option[(String, String)] = None,
   destinationUri: Option[String] = None,
   async: Boolean = true,
-  errorMsg: Option[String] = None) {
+  errorMsg: Option[String] = None,
+  documentCount: Option[Long] = None) {
 
   val queryTimeDeclarations: String = s"""
     |DECLARE startTimeInclusive TIMESTAMP DEFAULT TIMESTAMP("${startDateInc.atStartOfDay(UTC).toInstant}");
@@ -33,14 +34,10 @@ case class JobConfig(
 }
 
 object JobConfig {
-  // sometimes you just have to admire scala ... *sometimes* ...
-  implicit val localDateReader: default.ReadWriter[LocalDate] =
-    upickle.default.readwriter[String].bimap[LocalDate](_.toString, LocalDate.parse)
+  import JsonHelpers._
 
-  implicit val instantReader: default.ReadWriter[Instant] =
-    upickle.default.readwriter[String].bimap[Instant](_.toString, Instant.parse)
-
-  implicit val jobState = upickle.default.readwriter[String].bimap[JobState.Value](_.toString, JobState.withName)
+  implicit val jobState = upickle.default.readwriter[String]
+    .bimap[JobState.Value](_.toString, JobState.withName)
 
   implicit val readWriter = upickle.default.macroRW[JobConfig]
 

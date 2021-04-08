@@ -14,6 +14,7 @@ deployments:
         - ophan-backfill-QueryJobStateLambda-
         - ophan-backfill-ExtractDataLambda-
         - ophan-backfill-AwaitExtractJobLambda-
+        - ophan-backfill-ManifestFileLambda-
   cloudformation:
     type: cloud-formation
     dependencies: [ophan-backfill]
