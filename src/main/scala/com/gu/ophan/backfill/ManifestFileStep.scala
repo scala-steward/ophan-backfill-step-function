@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import upickle.default._
 import java.nio.channels.Channels
+import com.google.cloud.storage.{ BlobId, BlobInfo, StorageOptions }
 
 object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
 
@@ -11,6 +12,7 @@ object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
     (for (cfg <- input.headOption) yield {
       logger.info("creating manifest file")
 
+      // if we use the same function we will definitely end up in the same place
       val prefix = ExtractDataStep.pathPrefix(cfg)
 
       val manifestLines = input.map { jobConfig =>
@@ -21,22 +23,22 @@ object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
     }).getOrElse("<<EMPTY>>")
   }
 
-  import com.google.cloud.storage.BlobId
-  import com.google.cloud.storage.BlobInfo
-  import com.google.cloud.storage.StorageOptions
-
   def uploadObject(
     prefix: String,
     manifest: Seq[ManifestFileLine],
     projectId: String = "datatech-platform-prod",
     bucketName: String = "gu-ophan-backfill-prod",
-    objectName: String = "manifest.json"): String = {
+    objectName: String = "manifest.json")(implicit env: Env): String = {
 
-    val storage = StorageOptions.newBuilder.setProjectId(projectId).build.getService
+    val storage = StorageOptions.newBuilder
+      .setProjectId(projectId)
+      .setCredentials(Auth.getCredentials(env))
+      .build
+      .getService
     val blobId = BlobId.of(bucketName, prefix + "/" + objectName)
     val blobInfo = BlobInfo.newBuilder(blobId).build
 
-    logger.info(s"writing manifest file: ${blobInfo.getName()}")
+    logger.info(s"writing manifest file: ${blobInfo} (prefix=[$prefix])")
 
     val out = Channels.newWriter(storage.writer(blobInfo), "UTF-8")
 
@@ -45,7 +47,7 @@ object ManifestFileStep extends JsonHandler[Seq[JobConfig], String] {
     } finally {
       out.close()
     }
-    blobInfo.getName()
+    s"gs://${blobId.getBucket}/${blobId.getName}"
   }
 }
 
