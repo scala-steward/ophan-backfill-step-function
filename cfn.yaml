@@ -94,7 +94,7 @@ Resources:
       Handler: com.gu.ophan.backfill.InitBackfillStep::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 60
 
   QueryJobStateLambda:
@@ -114,7 +114,7 @@ Resources:
       Handler: com.gu.ophan.backfill.AwaitQueryJobStep::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 60
 
   ExtractDataLambda:
@@ -134,7 +134,7 @@ Resources:
       Handler: com.gu.ophan.backfill.ExtractDataStep::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 60
 
   AwaitExtractJobLambda:
@@ -154,7 +154,7 @@ Resources:
       Handler: com.gu.ophan.backfill.AwaitExtractJobStep::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 60
 
 
@@ -176,7 +176,7 @@ Resources:
       Handler: com.gu.ophan.backfill.PartitionStep::handleRequest
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
-      Runtime: java8
+      Runtime: java8.al2
       Timeout: 60
 
   OphanBackfillStepFunction:

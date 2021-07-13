@@ -36,7 +36,7 @@ class BackfillLambdas(
       .functionName(s"${params.appParam.getValueAsString()}-$name-${params.stageParam.getValueAsString()}")
       .code(lambdaCodeBucket)
       .handler(handler)
-      .runtime(Runtime.JAVA_8)
+      .runtime(Runtime.JAVA_8_CORRETTO)
       .role(roles.executionRole)
       .environment(
         "Stage" -> params.stageParam.getValueAsString(),
