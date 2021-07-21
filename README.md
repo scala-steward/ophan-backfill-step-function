@@ -18,6 +18,8 @@ the 'rollup'.
 This data is then output into a CSV file which can be consumed by the
 ingester portion of the backfill process.
 
+**For more information read the full [Ophan backfill guide](https://github.com/guardian/ophan/blob/main/docs/developing-ophan/how-to-do-a-backfill.md).**
+
 ## Extracting pageviews from the data lake
 
 In order to actually perform a backfill, the first thing you need to do
