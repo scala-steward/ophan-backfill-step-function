@@ -49,6 +49,7 @@ FROM (SELECT
     FROM datalake.pageview
     WHERE
     received_date between date(startTimeInclusive) and DATE_ADD(date(endTimeExclusive), INTERVAL 7 DAY) -- events can be received much later than they occur. Restricting received_date is valuable because it constrains the amount of data loaded by BigQuery
+    and length(path) < 350 -- we don't believe any legitimate paths are longer than about 250 characters
     GROUP BY 1,2,3,4,5,6,7,8,9,10,11
 ) AS results
 where
