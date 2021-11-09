@@ -10,8 +10,8 @@ import com.google.cloud.bigquery.Job
 
 object AwaitQueryJobStep extends SimpleHandler[JobConfig] with AwaitJob {
   override def onComplete(cfg: JobConfig, job: Job): JobConfig = {
-    val destTable = job.getConfiguration[QueryJobConfiguration]().getDestinationTable()
-    logger.info(s"Destination table: ${destTable}")
-    cfg.copy(dataTable = Some((destTable.getDataset(), destTable.getTable())))
+    val destTable = Option(job.getConfiguration[QueryJobConfiguration]().getDestinationTable)
+    logger.info(s"Destination table: $destTable")
+    cfg.copy(dataTable = destTable.map(dt => (dt.getDataset, dt.getTable)))
   }
 }
