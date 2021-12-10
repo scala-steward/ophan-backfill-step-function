@@ -1,9 +1,7 @@
 package com.gu.ophan.backfill
 
 import com.google.cloud.bigquery.{ Option => _, _ }
-import com.google.api.gax.paging.Page
 import com.google.cloud.bigquery.QueryJobConfiguration
-import java.time.Instant
 
 class BigQuery(implicit env: Env) {
   val projectId = "datatech-platform-" + env.stage.toLowerCase
