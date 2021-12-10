@@ -4,8 +4,6 @@ import java.time.LocalDate.ofEpochDay
 import java.time.ZoneOffset.UTC
 import java.time.{ Instant, LocalDate }
 
-import upickle.default
-
 object JobState extends Enumeration {
   val INIT, RUNNING, WAITING, ERROR, COMPLETED = Value
 }
