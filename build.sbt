@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %% "upickle" % "1.4.2",
   "com.google.cloud" % "google-cloud-bigquery" % "2.4.1",
   "com.google.cloud" % "google-cloud-storage" % "2.2.1",
-  "org.scalatest" %% "scalatest" % "3.2.9" % Test
+  "org.scalatest" %% "scalatest" % "3.2.10" % Test
 )
 
 enablePlugins(RiffRaffArtifact, BuildInfoPlugin)
