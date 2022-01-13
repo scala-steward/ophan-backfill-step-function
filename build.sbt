@@ -6,7 +6,7 @@ description:= "ophan backfill step function lambdas"
 
 version := "1.0"
 
-scalaVersion := "2.13.7"
+scalaVersion := "2.13.8"
 
 scalacOptions ++= Seq(
   "-deprecation",
