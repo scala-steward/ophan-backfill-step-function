@@ -20,13 +20,13 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.1",
 
   "net.logstash.logback" % "logstash-logback-encoder" % "7.0.1",
-  "org.slf4j" % "log4j-over-slf4j" % "1.7.32", //  log4j-over-slf4j provides `org.apache.log4j.MDC`, which is dynamically loaded by the Lambda runtime
+  "org.slf4j" % "log4j-over-slf4j" % "1.7.36", //  log4j-over-slf4j provides `org.apache.log4j.MDC`, which is dynamically loaded by the Lambda runtime
   "ch.qos.logback" % "logback-classic" % "1.2.10",
 
-  "com.amazonaws" % "aws-java-sdk-ssm" % "1.12.122",
+  "com.amazonaws" % "aws-java-sdk-ssm" % "1.12.156",
   "com.lihaoyi" %% "upickle" % "1.4.3",
   "com.google.cloud" % "google-cloud-bigquery" % "2.5.1",
-  "com.google.cloud" % "google-cloud-storage" % "2.2.1",
+  "com.google.cloud" % "google-cloud-storage" % "2.2.3",
   "org.scalatest" %% "scalatest" % "3.2.10" % Test
 )
 
