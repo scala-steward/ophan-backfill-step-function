@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "log4j-over-slf4j" % "1.7.36", //  log4j-over-slf4j provides `org.apache.log4j.MDC`, which is dynamically loaded by the Lambda runtime
   "ch.qos.logback" % "logback-classic" % "1.2.10",
 
-  "com.amazonaws" % "aws-java-sdk-ssm" % "1.12.156",
+  "com.amazonaws" % "aws-java-sdk-ssm" % "1.12.259",
   "com.lihaoyi" %% "upickle" % "1.4.3",
   "com.google.cloud" % "google-cloud-bigquery" % "2.5.1",
   "com.google.cloud" % "google-cloud-storage" % "2.2.3",
