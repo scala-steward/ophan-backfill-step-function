@@ -26,7 +26,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-ssm" % "1.12.156",
   "com.lihaoyi" %% "upickle" % "1.4.3",
   "com.google.cloud" % "google-cloud-bigquery" % "2.5.1",
-  "com.google.cloud" % "google-cloud-storage" % "2.2.3",
+  "com.google.cloud" % "google-cloud-storage" % "2.10.0",
   "org.scalatest" %% "scalatest" % "3.2.10" % Test
 )
 
